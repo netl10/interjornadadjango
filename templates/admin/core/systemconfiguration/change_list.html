@@ -1,0 +1,16 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'core:configuracao_sistema' %}" class="addlink" style="background: #28a745; border-color: #28a745;">
+            ⚙️ Configurar Sistema
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'core:configuracao_help' %}" class="addlink" style="background: #007bff; border-color: #007bff;">
+            ❓ Ajuda
+        </a>
+    </li>
+{% endblock %}

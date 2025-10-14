@@ -1,0 +1,466 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}Configuração do Sistema{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .config-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .config-section {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .config-section h3 {
+        margin-top: 0;
+        color: #007bff;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #495057;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #007bff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-group .help-text {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #1e7e34;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-active {
+        background: #28a745;
+    }
+    
+    .status-inactive {
+        background: #6c757d;
+    }
+    
+    .config-summary {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .config-summary h4 {
+        margin-top: 0;
+        color: #007bff;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    
+    .summary-item {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 3px solid #007bff;
+    }
+    
+    .summary-item strong {
+        color: #495057;
+    }
+    
+    .test-connection {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .test-result {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    
+    .test-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .test-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <a href="{% url 'admin:index' %}">Início</a> &rsaquo;
+    <a href="{% url 'admin:core_systemconfiguration_changelist' %}">Configurações do Sistema</a> &rsaquo;
+    Configuração
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="config-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="config-summary">
+        <h4>📋 Resumo da Configuração Atual</h4>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <strong>🌐 Dispositivo Principal:</strong><br>
+                {{ config.device_ip }}:{{ config.device_port }}<br>
+                <small>Usuário: {{ config.device_username }}</small>
+            </div>
+            <div class="summary-item">
+                <strong>⏰ Timezone:</strong><br>
+                {{ config.get_timezone_info }}<br>
+                <small>Offset: {{ config.timezone_offset }}</small>
+            </div>
+            <div class="summary-item">
+                <strong>🚪 Interjornada:</strong><br>
+                Liberado: {{ config.get_liberado_hours|floatformat:1 }}h<br>
+                Bloqueado: {{ config.get_bloqueado_hours|floatformat:1 }}h
+            </div>
+            <div class="summary-item">
+                <strong>📊 Monitoramento:</strong><br>
+                Intervalo: {{ config.monitor_interval }}s<br>
+                Timeout: {{ config.giro_validation_timeout }}s
+            </div>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="config-section">
+            <h3>🌐 Configurações de Conexão - Dispositivo Principal</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="device_ip">IP do Dispositivo:</label>
+                    <input type="text" id="device_ip" name="device_ip" value="{{ config.device_ip }}" required>
+                    <div class="help-text">Ex: 192.168.1.251</div>
+                </div>
+                <div class="form-group">
+                    <label for="device_port">Porta:</label>
+                    <input type="number" id="device_port" name="device_port" value="{{ config.device_port }}" min="1" max="65535" required>
+                    <div class="help-text">80 para HTTP, 443 para HTTPS</div>
+                </div>
+                <div class="form-group">
+                    <label for="device_username">Usuário:</label>
+                    <input type="text" id="device_username" name="device_username" value="{{ config.device_username }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="device_password">Senha:</label>
+                    <input type="password" id="device_password" name="device_password" value="{{ config.device_password }}" required>
+                </div>
+            </div>
+            <div class="test-connection">
+                <button type="button" class="btn btn-warning" onclick="testConnection()">🔍 Testar Conexão</button>
+                <div id="test-result"></div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>🌐 Configurações de Conexão - Dispositivo Secundário (Opcional)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="secondary_device_ip">IP do Dispositivo Secundário:</label>
+                    <input type="text" id="secondary_device_ip" name="secondary_device_ip" value="{{ config.secondary_device_ip|default:'' }}">
+                    <div class="help-text">Deixe vazio para desabilitar</div>
+                </div>
+                <div class="form-group">
+                    <label for="secondary_device_port">Porta:</label>
+                    <input type="number" id="secondary_device_port" name="secondary_device_port" value="{{ config.secondary_device_port|default:'' }}" min="1" max="65535">
+                </div>
+                <div class="form-group">
+                    <label for="secondary_device_username">Usuário:</label>
+                    <input type="text" id="secondary_device_username" name="secondary_device_username" value="{{ config.secondary_device_username }}">
+                </div>
+                <div class="form-group">
+                    <label for="secondary_device_password">Senha:</label>
+                    <input type="password" id="secondary_device_password" name="secondary_device_password" value="{{ config.secondary_device_password }}">
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>⏰ Configurações de Timezone e Tempo</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="timezone_offset">Timezone (UTC):</label>
+                    <select id="timezone_offset" name="timezone_offset" required>
+                        {% for offset, label in timezone_options %}
+                        <option value="{{ offset }}" {% if config.timezone_offset == offset %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="help-text">Selecione o fuso horário local</div>
+                </div>
+                <div class="form-group">
+                    <label for="giro_validation_timeout">Timeout de Validação de Giro (segundos):</label>
+                    <input type="number" id="giro_validation_timeout" name="giro_validation_timeout" value="{{ config.giro_validation_timeout }}" min="1" max="60" required>
+                    <div class="help-text">Tempo para validar giro da catraca</div>
+                </div>
+                <div class="form-group">
+                    <label for="monitor_interval">Intervalo de Monitoramento (segundos):</label>
+                    <input type="number" id="monitor_interval" name="monitor_interval" value="{{ config.monitor_interval }}" min="1" max="60" required>
+                    <div class="help-text">Tempo entre verificações de novos eventos</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>🚪 Configurações de Interjornada</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="liberado_minutes">Tempo de Acesso Livre (minutos):</label>
+                    <input type="number" id="liberado_minutes" name="liberado_minutes" value="{{ config.liberado_minutes }}" min="1" max="1440" required>
+                    <div class="help-text">Tempo em minutos que o usuário pode acessar livremente</div>
+                </div>
+                <div class="form-group">
+                    <label for="bloqueado_minutes">Tempo de Interjornada (minutos):</label>
+                    <input type="number" id="bloqueado_minutes" name="bloqueado_minutes" value="{{ config.bloqueado_minutes }}" min="1" max="10080" required>
+                    <div class="help-text">Tempo em minutos de bloqueio após o acesso</div>
+                </div>
+                <div class="form-group">
+                    <label for="exemption_group_name">Nome do Grupo de Exceção:</label>
+                    <input type="text" id="exemption_group_name" name="exemption_group_name" value="{{ config.exemption_group_name }}" required>
+                    <div class="help-text">Usuários neste grupo não seguem regras de interjornada</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>🔄 Configurações de Reinício Automático</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="restart_time_1">Horário de Reinício 1:</label>
+                    <input type="time" id="restart_time_1" name="restart_time_1" value="{{ config.restart_time_1|default:'' }}">
+                    <div class="help-text">Formato: HH:MM (deixe vazio para desabilitar)</div>
+                </div>
+                <div class="form-group">
+                    <label for="restart_time_2">Horário de Reinício 2:</label>
+                    <input type="time" id="restart_time_2" name="restart_time_2" value="{{ config.restart_time_2|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="restart_time_3">Horário de Reinício 3:</label>
+                    <input type="time" id="restart_time_3" name="restart_time_3" value="{{ config.restart_time_3|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="restart_time_4">Horário de Reinício 4:</label>
+                    <input type="time" id="restart_time_4" name="restart_time_4" value="{{ config.restart_time_4|default:'' }}">
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>🔒 Configurações de Segurança e Logs</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="ssl_verify" {% if config.ssl_verify %}checked{% endif %}>
+                        Verificar SSL
+                    </label>
+                    <div class="help-text">Verificar certificados SSL (desabilitar para desenvolvimento)</div>
+                </div>
+                <div class="form-group">
+                    <label for="max_logs_per_request">Máximo de Logs por Requisição:</label>
+                    <input type="number" id="max_logs_per_request" name="max_logs_per_request" value="{{ config.max_logs_per_request }}" min="1" max="10000" required>
+                    <div class="help-text">Limite para não sobrecarregar a catraca</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button type="submit" class="btn btn-success">💾 Salvar Configurações</button>
+            <a href="{% url 'admin:core_systemconfiguration_changelist' %}" class="btn btn-primary">📋 Ver Todas as Configurações</a>
+            <a href="{% url 'core:configuracao_help' %}" class="btn btn-warning">❓ Ajuda</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function testConnection() {
+    const deviceIp = document.getElementById('device_ip').value;
+    const devicePort = document.getElementById('device_port').value;
+    const deviceUsername = document.getElementById('device_username').value;
+    const devicePassword = document.getElementById('device_password').value;
+    
+    if (!deviceIp || !devicePort || !deviceUsername || !devicePassword) {
+        showTestResult('Por favor, preencha todos os campos de conexão', 'error');
+        return;
+    }
+    
+    showTestResult('Testando conexão...', 'info');
+    
+    fetch('{% url "core:test_device_connection" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            device_ip: deviceIp,
+            device_port: devicePort,
+            device_username: deviceUsername,
+            device_password: devicePassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showTestResult(data.message, 'success');
+        } else {
+            showTestResult(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showTestResult('Erro ao testar conexão: ' + error.message, 'error');
+    });
+}
+
+function showTestResult(message, type) {
+    const resultDiv = document.getElementById('test-result');
+    resultDiv.innerHTML = `<div class="test-result test-${type}">${message}</div>`;
+}
+</script>
+{% endblock %}

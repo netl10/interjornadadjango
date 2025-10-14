@@ -1,0 +1,1 @@
+# Interjornada System Django Project

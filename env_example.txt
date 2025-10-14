@@ -1,0 +1,115 @@
+# Configurações do Django
+SECRET_KEY=django-insecure-change-me-in-production
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Configurações do Banco de Dados
+DB_NAME=interjornada_db
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOST=localhost
+DB_PORT=5432
+
+# Configurações do Redis
+REDIS_URL=redis://localhost:6379/0
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+
+# Configurações do Dispositivo Principal (IDFace)
+PRIMARY_DEVICE_IP=192.168.1.251
+PRIMARY_DEVICE_PORT=443
+PRIMARY_DEVICE_USERNAME=admin
+PRIMARY_DEVICE_PASSWORD=admin
+PRIMARY_DEVICE_USE_HTTPS=True
+
+# Configurações do Dispositivo Secundário (Opcional)
+SECONDARY_DEVICE_IP=192.168.1.252
+SECONDARY_DEVICE_PORT=80
+SECONDARY_DEVICE_USERNAME=admin
+SECONDARY_DEVICE_PASSWORD=admin
+SECONDARY_DEVICE_USE_HTTPS=False
+
+# Configurações de Timezone
+TIMEZONE_OFFSET=-3
+DISPLAY_TIMEZONE=America/Sao_Paulo
+
+# Configurações de Tempo de Trabalho e Interjornada
+WORK_DURATION_MINUTES=480
+REST_DURATION_MINUTES=672
+
+# Configurações de Monitoramento
+MONITOR_INTERVAL_SECONDS=3
+GIRO_VALIDATION_TIMEOUT_SECONDS=3
+
+# Configurações de Timeout
+DEVICE_CONNECTION_TIMEOUT=15
+DEVICE_REQUEST_TIMEOUT=10
+
+# Configurações de Reconexão
+MAX_RECONNECTION_ATTEMPTS=10
+BASE_RECONNECTION_DELAY=2
+MAX_RECONNECTION_DELAY=60
+
+# Configurações de Cache
+WHITELIST_CACHE_DURATION=3600
+API_CACHE_DURATION=60
+
+# Configurações de Logs
+LOG_RETENTION_DAYS=30
+MAX_LOG_ENTRIES=10000
+
+# Configurações de Grupo de Exceção
+EXEMPTION_GROUP_NAME=whitelist
+
+# Configurações de Reinício Automático
+RESTART_TIMES=
+
+# Configurações de Ciclo
+CYCLE_TIMEOUT_HOURS=48
+MIN_CYCLE_DURATION_MINUTES=5
+
+# Configurações de Erro
+MAX_401_ERRORS=5
+ERROR_COOLDOWN_MINUTES=5
+
+# Configurações de WebSocket
+WEBSOCKET_HEARTBEAT_INTERVAL=30
+WEBSOCKET_CLEANUP_INTERVAL=60
+
+# Configurações de Dashboard
+DASHBOARD_REFRESH_INTERVAL=3
+MODAL_AUTO_CLOSE_SECONDS=8
+
+# Configurações de Áudio
+AUDIO_FILE_PATH=static/audio/agurade.mp3
+AUDIO_ENABLED=True
+
+# Configurações de SSL
+SSL_VERIFY=False
+
+# Configurações de Debug
+DEVICE_DEBUG=False
+LOG_LEVEL=INFO
+
+# Configurações de Performance
+BATCH_SIZE=100
+MAX_CONCURRENT_REQUESTS=10
+
+# Configurações de Backup
+BACKUP_ENABLED=True
+BACKUP_INTERVAL_HOURS=24
+BACKUP_RETENTION_DAYS=7
+
+# Configurações de Notificação
+NOTIFICATION_ENABLED=True
+EMAIL_NOTIFICATIONS=False
+SMS_NOTIFICATIONS=False
+
+# Configurações de Segurança
+SESSION_COOKIE_AGE=3600
+CSRF_COOKIE_AGE=3600
+
+# Configurações de Rate Limiting
+RATE_LIMIT_ENABLED=True
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_WINDOW=60
