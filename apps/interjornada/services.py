@@ -264,8 +264,8 @@ class InterjornadaService:
                 # Verificar se já pode sair da interjornada
                 current_time = TimezoneUtils.get_utc_now()
                 if current_time >= session.return_time:
-                    # Liberar da interjornada
-                    self.unblock_user_from_interjornada(employee)
+                    # Liberar da interjornada usando o session_service que tem a implementação correta
+                    session_service.unblock_user_from_interjornada(employee)
                     return {
                         'success': True,
                         'message': 'Funcionário liberado da interjornada',
