@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interjornada Ativa - Sistema de Controle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .employee-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .employee-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .employee-id {
+            background: #ecf0f1;
+            color: #7f8c8d;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-blocked {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            color: white;
+        }
+
+        .time-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .time-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+        }
+
+        .time-label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .time-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .blacklist-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            color: #856404;
+        }
+
+        .blacklist-icon {
+            width: 16px;
+            height: 16px;
+            background: #f39c12;
+            border-radius: 50%;
+        }
+
+        .no-sessions {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+        }
+
+        .no-sessions h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .no-sessions p {
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+
+        .refresh-info {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .employee-card {
+                padding: 20px;
+            }
+
+            .time-info {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .employee-name {
+                font-size: 1.2rem;
+            }
+
+            .time-value {
+                font-size: 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Interjornada Ativa</h1>
+            <p>Monitoramento em tempo real das sessões de interjornada</p>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Sistema Online</span>
+            </div>
+        </div>
+
+        <div id="sessions-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                Carregando sessões...
+            </div>
+        </div>
+
+        <div class="refresh-info">
+            Atualização automática a cada 5 segundos
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval;
+
+        function formatTime(minutes) {
+            if (minutes === null || minutes === undefined) return 'N/A';
+            if (minutes <= 0) return 'Liberado';
+            
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${mins}min`;
+            }
+            return `${mins}min`;
+        }
+
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return 'N/A';
+            const date = new Date(dateTimeStr);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function calculateProgress(elapsed, total) {
+            if (!total || total <= 0) return 0;
+            return Math.min((elapsed / total) * 100, 100);
+        }
+
+        function renderSessions(sessions) {
+            const container = document.getElementById('sessions-container');
+            
+            if (!sessions || sessions.length === 0) {
+                container.innerHTML = `
+                    <div class="no-sessions">
+                        <h2>🎉 Nenhuma Interjornada Ativa</h2>
+                        <p>Todos os funcionários estão liberados para trabalhar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sessionsHTML = sessions.map(session => {
+                const progress = calculateProgress(
+                    session.tempo_decorrido_minutos, 
+                    session.rest_duration_minutes
+                );
+
+                return `
+                    <div class="employee-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="employee-name">${session.employee_name}</div>
+                                <div class="employee-id">ID: ${session.employee_id}</div>
+                            </div>
+                            <div class="status-badge status-${session.state}">
+                                ${session.state_display}
+                            </div>
+                        </div>
+
+                        <div class="time-info">
+                            <div class="time-item">
+                                <div class="time-label">Início do Bloqueio</div>
+                                <div class="time-value">${formatDateTime(session.block_start)}</div>
+                            </div>
+                            <div class="time-item">
+                                <div class="time-label">Retorno Previsto</div>
+                                <div class="time-value">${formatDateTime(session.return_time)}</div>
+                            </div>
+                        </div>
+
+                        <div class="time-info">
+                            <div class="time-item">
+                                <div class="time-label">Tempo Decorrido</div>
+                                <div class="time-value">${formatTime(session.tempo_decorrido_minutos)}</div>
+                            </div>
+                            <div class="time-item">
+                                <div class="time-label">Tempo Restante</div>
+                                <div class="time-value">${formatTime(session.tempo_restante_liberacao)}</div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progresso da Interjornada</span>
+                                <span>${progress.toFixed(1)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+
+                        ${session.is_in_blacklist ? `
+                            <div class="blacklist-indicator">
+                                <div class="blacklist-icon"></div>
+                                <span>Funcionário bloqueado na catraca</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="cards-container">
+                    ${sessionsHTML}
+                </div>
+            `;
+        }
+
+        async function loadSessions() {
+            try {
+                const response = await fetch('/admin/employee_sessions/api/interjornada-ativa/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderSessions(data.sessoes);
+                } else {
+                    console.error('Erro ao carregar sessões:', data.error);
+                    document.getElementById('sessions-container').innerHTML = `
+                        <div class="no-sessions">
+                            <h2>❌ Erro ao Carregar</h2>
+                            <p>Não foi possível carregar as sessões</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+            }
+        }
+
+        // Carregar sessões inicialmente
+        loadSessions();
+
+        // Configurar atualização automática
+        refreshInterval = setInterval(loadSessions, 5000);
+
+        // Limpar intervalo quando a página for fechada
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
