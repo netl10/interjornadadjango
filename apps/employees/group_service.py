@@ -115,41 +115,41 @@ class GroupService:
             local_move_success = False
             try:
                 # Atualizar no banco local
-                    employee.group = self.blacklist_group
-                    employee.save(update_fields=['group'])
+                employee.group = self.blacklist_group
+                employee.save(update_fields=['group'])
                 local_move_success = True
                 logger.info(f"Funcionário {employee.name} movido para blacklist no sistema local")
             except Exception as e:
                 logger.error(f"Erro ao mover {employee.name} para blacklist no sistema local: {e}")
                 return False
-                    
-                    # Log da ação
-                    SystemLog.objects.create(
-                        level='INFO',
-                        category='interjornada',
-                        message=f'Funcionário {employee.name} movido para blacklist',
-                        user_id=employee.device_id,
-                        user_name=employee.name,
-                        details={
-                            'action': 'moved_to_blacklist',
-                            'original_group': employee.original_group.name if employee.original_group else 'N/A',
-                            'blacklist_group': self.blacklist_group.name,
+            
+            # Log da ação
+            SystemLog.objects.create(
+                level='INFO',
+                category='interjornada',
+                message=f'Funcionário {employee.name} movido para blacklist',
+                user_id=employee.device_id,
+                user_name=employee.name,
+                details={
+                    'action': 'moved_to_blacklist',
+                    'original_group': employee.original_group.name if employee.original_group else 'N/A',
+                    'blacklist_group': self.blacklist_group.name,
                     'device_group_id': self.blacklist_group.device_group_id,
                     'device_move_success': device_move_success,
                     'local_move_success': local_move_success,
-                            'timestamp': timezone.now().isoformat()
-                        }
-                    )
-                    
+                    'timestamp': timezone.now().isoformat()
+                }
+            )
+            
             if device_move_success and local_move_success:
                 logger.info(f"Funcionário {employee.name} movido para blacklist com sucesso (dispositivo + sistema)")
-                    return True
+                return True
             elif local_move_success:
                 logger.warning(f"Funcionário {employee.name} movido para blacklist apenas no sistema local (falha no dispositivo)")
                 return True  # Retornar True pois o bloqueio local é mais importante
-                else:
+            else:
                 logger.error(f"Falha ao mover {employee.name} para blacklist")
-                    return False
+                return False
                     
         except Exception as e:
             logger.error(f"Erro ao mover {employee.name} para blacklist: {e}")
@@ -158,8 +158,8 @@ class GroupService:
     def restore_from_blacklist(self, employee: Employee) -> bool:
         """Restaura funcionário do grupo de blacklist para o grupo original - Robusto contra falhas."""
         try:
-                if not employee.original_group:
-                    logger.warning(f"Funcionário {employee.name} não tem grupo original salvo")
+            if not employee.original_group:
+                logger.warning(f"Funcionário {employee.name} não tem grupo original salvo")
                 # Tentar usar grupo padrão como fallback
                 default_group = self.get_original_group(employee)
                 if default_group:
@@ -185,7 +185,7 @@ class GroupService:
                 else:
                     logger.error(f"Não foi possível restaurar {employee.name} - nem grupo original nem padrão encontrados")
                     return False
-                
+            
             # Tentar restaurar no dispositivo
             device_restore_success = False
             try:
