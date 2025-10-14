@@ -31,6 +31,8 @@ urlpatterns = [
     path('api/v1/logs/', include('apps.logs.urls')),
     path('api/v1/interjornada/', include('apps.interjornada.urls')),
     path('api/v1/dashboard/', include('apps.dashboard.urls')),
+    # Página principal de interjornada
+    path('', include('apps.employee_sessions.urls')),
 ]
 
 # Servir arquivos estáticos e media em desenvolvimento

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interjornada - Monitor de Sessões</title>
+    <style>
+        /* Reset e base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #6c757d;
+            font-size: 1.2em;
+            font-weight: 300;
+        }
+
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+
+        .status-dot.offline {
+            background: #dc3545;
+            animation: none;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.1);
+            }
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #ccc, #999);
+            transition: .4s;
+            border-radius: 28px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Grid de sessões */
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card de sessão */
+        .session-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .session-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .session-card.active {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(255, 255, 255, 0.95));
+        }
+
+        .session-card.pending-rest {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(255, 255, 255, 0.95));
+        }
+
+        .session-card.blocked {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(255, 255, 255, 0.95));
+        }
+
+        /* Header do card */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .employee-info h3 {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .employee-id {
+            font-size: 0.9em;
+            color: #6c757d;
+            background: rgba(108, 117, 125, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge.active {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .status-badge.pending-rest {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .status-badge.blocked {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            color: white;
+        }
+
+        /* Conteúdo do card */
+        .card-content {
+            font-size: 0.95em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .time-info {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05));
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .time-highlight {
+            color: #dc3545;
+            font-weight: 800;
+            font-size: 1.1em;
+        }
+
+        /* Estado vazio */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .sessions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+            
+            .status-info {
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .session-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .session-card {
+                padding: 15px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⏰ Interjornada</h1>
+            <p>Monitor de Sessões Ativas</p>
+        </div>
+        
+        <!-- Status bar -->
+        <div class="status-bar">
+            <div class="status-info">
+                <div class="status-item">
+                    <span id="monitor-status-dot" class="status-dot"></span>
+                    <span id="monitor-status-text">Monitor Online</span>
+                </div>
+                <div class="status-item">
+                    <span id="total-sessions">0</span>
+                    <span>Sessões Ativas</span>
+                </div>
+            </div>
+            
+            <div class="auto-refresh">
+                <label for="autoRefreshToggle">Auto-refresh:</label>
+                <label class="switch">
+                    <input type="checkbox" id="autoRefreshToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Container das sessões -->
+        <div id="sessions-container">
+            <div class="empty-state" id="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h3>Nenhuma sessão ativa</h3>
+                <p>As sessões aparecerão aqui quando funcionários passarem na catraca</p>
+            </div>
+            
+            <div class="sessions-grid" id="sessions-grid" style="display: none;">
+                <!-- Cards de sessão serão inseridos aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshEnabled = true;
+        let refreshInterval = 3000; // 3 segundos
+        let lastSessionsData = [];
+
+        // Formatar tempo
+        function formatTime(minutes) {
+            if (minutes < 60) {
+                return `${minutes}min`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                return `${hours}h ${mins}min`;
+            }
+        }
+
+        // Formatar timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'N/A';
+            
+            // Extrair apenas o tempo (HH:MM:SS)
+            if (timestamp.includes(' ')) {
+                return timestamp.split(' ')[1];
+            }
+            if (timestamp.includes('T')) {
+                return timestamp.split('T')[1].substring(0, 8);
+            }
+            return timestamp;
+        }
+
+        // Obter classe CSS do estado
+        function getStateClass(state) {
+            switch(state) {
+                case 'active': return 'active';
+                case 'pending_rest': return 'pending-rest';
+                case 'blocked': return 'blocked';
+                default: return 'active';
+            }
+        }
+
+        // Obter texto do estado
+        function getStateText(state) {
+            switch(state) {
+                case 'active': return 'Trabalhando';
+                case 'pending_rest': return 'Aguardando Saída';
+                case 'blocked': return 'Interjornada';
+                default: return 'Ativo';
+            }
+        }
+
+        // Criar card de sessão
+        function createSessionCard(session) {
+            const stateClass = getStateClass(session.state);
+            const stateText = getStateText(session.state);
+            
+            let timeInfo = '';
+            
+            if (session.state === 'active') {
+                if (session.tempo_restante_interjornada !== null) {
+                    timeInfo = `
+                        <div class="time-info">
+                            <div class="info-row">
+                                <span class="info-label">Tempo decorrido:</span>
+                                <span class="info-value">${formatTime(session.tempo_decorrido_minutos)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Pode sair em:</span>
+                                <span class="info-value time-highlight">${formatTime(session.tempo_restante_interjornada)}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    timeInfo = `
+                        <div class="time-info">
+                            <div class="info-row">
+                                <span class="info-label">Tempo decorrido:</span>
+                                <span class="info-value">${formatTime(session.tempo_decorrido_minutos)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Status:</span>
+                                <span class="info-value time-highlight">Pode sair!</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (session.state === 'blocked') {
+                timeInfo = `
+                    <div class="time-info">
+                        <div class="info-row">
+                            <span class="info-label">Bloqueado desde:</span>
+                            <span class="info-value">${formatTimestamp(session.block_start)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Libera em:</span>
+                            <span class="info-value time-highlight">${formatTime(session.tempo_restante_liberacao)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="session-card ${stateClass}" data-session-id="${session.id}">
+                    <div class="card-header">
+                        <div class="employee-info">
+                            <h3>${session.employee_name}</h3>
+                            <span class="employee-id">ID: ${session.employee_id}</span>
+                        </div>
+                        <span class="status-badge ${stateClass}">${stateText}</span>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="info-row">
+                            <span class="info-label">Iniciado em:</span>
+                            <span class="info-value">${formatTimestamp(session.first_access)}</span>
+                        </div>
+                        ${session.last_access ? `
+                            <div class="info-row">
+                                <span class="info-label">Último acesso:</span>
+                                <span class="info-value">${formatTimestamp(session.last_access)}</span>
+                            </div>
+                        ` : ''}
+                        ${timeInfo}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Buscar sessões
+        async function fetchSessions() {
+            if (!autoRefreshEnabled) return;
+
+            try {
+                const response = await fetch('/admin/sessions/api/sessoes-ativas/');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Atualizar contador
+                    document.getElementById('total-sessions').textContent = data.total_sessoes;
+
+                    // Verificar mudanças
+                    const currentIds = data.sessoes.map(s => s.id).sort();
+                    const lastIds = lastSessionsData.map(s => s.id).sort();
+                    const hasChanges = JSON.stringify(currentIds) !== JSON.stringify(lastIds);
+                    
+                    if (hasChanges || data.sessoes.length === 0) {
+                        updateSessionsDisplay(data.sessoes);
+                        lastSessionsData = data.sessoes;
+                    }
+
+                    updateMonitorStatus(true);
+                } else {
+                    console.error('Erro na API:', data.error);
+                    updateMonitorStatus(false);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar sessões:', error);
+                updateMonitorStatus(false);
+            }
+        }
+
+        // Atualizar exibição
+        function updateSessionsDisplay(sessions) {
+            const container = document.getElementById('sessions-container');
+            const emptyState = document.getElementById('empty-state');
+            const grid = document.getElementById('sessions-grid');
+
+            if (sessions.length === 0) {
+                emptyState.style.display = 'block';
+                grid.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                grid.style.display = 'grid';
+                
+                grid.innerHTML = '';
+                sessions.forEach(session => {
+                    const cardHtml = createSessionCard(session);
+                    grid.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            }
+        }
+
+        // Atualizar status do monitor
+        function updateMonitorStatus(isOnline) {
+            const statusText = document.getElementById('monitor-status-text');
+            const statusDot = document.getElementById('monitor-status-dot');
+            
+            if (isOnline) {
+                statusText.textContent = 'Monitor Online';
+                statusDot.className = 'status-dot';
+            } else {
+                statusText.textContent = 'Monitor Offline';
+                statusDot.className = 'status-dot offline';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('autoRefreshToggle').addEventListener('change', function() {
+            autoRefreshEnabled = this.checked;
+            if (autoRefreshEnabled) {
+                fetchSessions();
+            }
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchSessions();
+            setInterval(fetchSessions, refreshInterval);
+        });
+    </script>
+</body>
+</html>
