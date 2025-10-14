@@ -571,7 +571,7 @@
             if (!autoRefreshEnabled) return;
 
             try {
-                const response = await fetch('/admin/sessions/api/sessoes-ativas/');
+                const response = await fetch('/api/sessoes-publicas/');
                 const data = await response.json();
 
                 if (data.success) {
