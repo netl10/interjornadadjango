@@ -365,6 +365,53 @@ class DeviceClient:
             logger.error(f"Erro ao obter role do dispositivo: {e}")
             return "0"
     
+    def get_access_events(self, last_processed_id: int = 0) -> List[Dict]:
+        """
+        Carrega eventos de acesso (giros) da catraca.
+        Baseado na documentação: access_events com TURN_LEFT, TURN_RIGHT, GIVE_UP.
+        """
+        try:
+            url = f"{self.base_url}/load_objects.fcgi?session={self.session_token}"
+            
+            data = {
+                "object": "access_events",
+                "where": {
+                    "access_events": {
+                        "id": {">": last_processed_id}
+                    }
+                },
+                "order": ["id", "descending"],
+                "limit": 100  # Limitar para não sobrecarregar
+            }
+            headers = {"Content-Type": "application/json"}
+            
+            response = self.session.post(
+                url, 
+                json=data, 
+                headers=headers, 
+                timeout=self.request_timeout
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                events = result.get("access_events", [])
+                if events:
+                    logger.debug(f"Eventos de acesso carregados (ID > {last_processed_id}): {len(events)} eventos")
+                return events
+            elif response.status_code == 401:
+                if self.handle_401_error():
+                    raise Exception("RESTART_REQUIRED")
+                return []
+            else:
+                logger.error(f"Erro ao carregar eventos de acesso: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            if "RESTART_REQUIRED" in str(e):
+                raise e
+            logger.error(f"Erro ao carregar eventos de acesso: {e}")
+            return []
+    
     def handle_401_error(self) -> bool:
         """Gerencia erros 401 e determina se deve fazer restart."""
         current_time = datetime.utcnow()

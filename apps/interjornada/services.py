@@ -244,13 +244,13 @@ class InterjornadaService:
             logger.error(f"Erro ao criar ciclo para {employee.name}: {e}")
             return None
     
-    def process_access_event(self, employee: Employee, event_type: int, timestamp: datetime, portal_id: int = 1) -> Dict:
+    def process_access_event(self, employee: Employee, event_type, timestamp: datetime, portal_id: int = 1) -> Dict:
         """
         Processa evento de acesso do funcionário.
         
         Args:
             employee: Funcionário
-            event_type: Tipo do evento (7=entrada/saída baseado no portal)
+            event_type: Tipo do evento ('pending_validation', 'abandonment', 1=entrada, 2=saída)
             timestamp: Timestamp do evento
             portal_id: ID do portal (1=entrada, 2=saída)
             
@@ -258,7 +258,8 @@ class InterjornadaService:
             Dict: Resultado do processamento
         """
         try:
-            # Verificar se funcionário está bloqueado
+            # CRÍTICO: Verificar se funcionário está bloqueado ANTES de qualquer processamento
+            # Baseado na lógica do arquivo de referência (linhas 1009-1024)
             session = session_service.get_user_session(employee)
             if session and session.state == 'blocked':
                 # Verificar se já pode sair da interjornada
@@ -266,27 +267,51 @@ class InterjornadaService:
                 if current_time >= session.return_time:
                     # Liberar da interjornada usando o session_service que tem a implementação correta
                     session_service.unblock_user_from_interjornada(employee)
+                    logger.info(f"Usuário {employee.name} liberado da interjornada - Acesso permitido")
                     return {
                         'success': True,
                         'message': 'Funcionário liberado da interjornada',
                         'action': 'allow'
                     }
                 else:
-                    # Ainda bloqueado
-                    time_remaining = session.return_time - current_time
-                    remaining_minutes = time_remaining.total_seconds() / 60
-                    return {
-                        'success': False,
-                        'message': f'Acesso negado - {remaining_minutes:.1f} minutos restantes de interjornada',
-                        'action': 'deny'
-                    }
-            
+                    # Ainda bloqueado - verificar se é saída pelo Portal 2
+                    if event_type == 2 and portal_id == 2:
+                        # Permitir saída pelo Portal 2 mesmo em interjornada
+                        logger.info(f"Usuário {employee.name} em interjornada - Permitindo saída pelo Portal 2")
+                        return {
+                            'success': True,
+                            'message': 'Saída permitida - Usuário em interjornada',
+                            'action': 'allow'
+                        }
+                    else:
+                        # Ainda bloqueado - NEGAR ACESSO (exceto saída Portal 2)
+                        time_remaining = session.return_time - current_time
+                        remaining_minutes = time_remaining.total_seconds() / 60
+                        return_time_str = session.return_time.strftime("%H:%M:%S")
+                        
+                        logger.warning(f"Acesso negado para {employee.name} - Em interjornada até {return_time_str} ({remaining_minutes:.1f}min restantes)")
+                        return {
+                            'success': False,
+                            'message': f'Acesso negado - {remaining_minutes:.1f} minutos restantes de interjornada',
+                            'action': 'deny'
+                        }
+                
+            # NOTA: Verificação de blacklist é feita no LogMonitorService
+            # para evitar processamento desnecessário
+                
             # Processar baseado no tipo de evento
-            # event_type 1 = Entrada
-            # event_type 2 = Saída
-            if event_type == 1:  # Entrada
+            if event_type == 'pending_validation':
+                # Evento 7 - Acesso autorizado, aguardar validação de giro
+                return self._process_pending_validation(employee, timestamp, portal_id)
+            elif event_type == 'abandonment':
+                # Evento 13 - Desistência, cancelar validação pendente
+                return self._process_abandonment(employee, timestamp)
+            elif event_type == 'unauthorized_access':
+                # Acesso não autorizado - NEGAR
+                return self._process_unauthorized_access(employee, timestamp)
+            elif event_type == 1:  # Entrada (legado)
                 return self._process_entry_event_new(employee, timestamp)
-            elif event_type == 2:  # Saída
+            elif event_type == 2:  # Saída (legado)
                 return self._process_exit_event_new(employee, timestamp)
             else:
                 return {
@@ -294,7 +319,7 @@ class InterjornadaService:
                     'message': 'Evento processado',
                     'action': 'allow'
                 }
-                
+                    
         except Exception as e:
             logger.error(f"Erro ao processar evento de acesso: {e}")
             return {
@@ -303,9 +328,224 @@ class InterjornadaService:
                 'action': 'deny'
             }
     
-    def _process_entry_event_new(self, employee: Employee, timestamp: datetime) -> Dict:
-        """Processa evento de entrada (nova lógica baseada em sessões)."""
+    def _process_pending_validation(self, employee: Employee, timestamp: datetime, portal_id: int) -> Dict:
+        """
+        Processa evento 7 - Acesso autorizado, aguardar validação de giro.
+        Baseado na lógica do arquivo de referência.
+        """
         try:
+            logger.info(f"Evento 7 - Acesso autorizado para {employee.name} no Portal {portal_id} - Processando entrada diretamente")
+            
+            # Verificar se já existe validação pendente para este usuário
+            cache_key = f"pending_validation_{employee.device_id}"
+            existing_validation = cache.get(cache_key)
+            
+            if existing_validation:
+                logger.info(f"Usuário {employee.name} já tem validação pendente - Processando entrada")
+                # Remover validação pendente e processar entrada
+                cache.delete(cache_key)
+                return self._process_entry_event_new(employee, timestamp, skip_validation_check=True)
+            
+            # Criar validação pendente
+            validation_data = {
+                'employee_id': employee.device_id,
+                'employee_name': employee.name,
+                'portal_id': portal_id,
+                'timestamp': timestamp.isoformat(),
+                'created_at': TimezoneUtils.get_utc_now().isoformat()
+            }
+            
+            # Armazenar validação pendente no cache por 5 minutos
+            cache.set(cache_key, validation_data, 300)
+            
+            logger.info(f"Validação pendente criada para {employee.name} - Portal {portal_id}")
+            
+            # Processar entrada diretamente (simular giro)
+            result = self._process_entry_event_new(employee, timestamp, skip_validation_check=True)
+            
+            if result.get('success'):
+                # Remover validação pendente se entrada foi bem-sucedida
+                cache.delete(cache_key)
+                logger.info(f"Sessão criada para {employee.name} após evento 7")
+                return result
+            else:
+                return {
+                    'success': True,
+                    'message': f'Acesso autorizado - Aguardando validação de giro (Portal {portal_id})',
+                    'action': 'pending_validation',
+                    'state': 'pending_validation'
+                }
+            
+        except Exception as e:
+            logger.error(f"Erro ao processar validação pendente para {employee.name}: {e}")
+            return {
+                'success': False,
+                'message': str(e),
+                'action': 'error'
+            }
+    
+    def _process_abandonment(self, employee: Employee, timestamp: datetime) -> Dict:
+        """
+        Processa evento 13 - Desistência, cancelar validação pendente.
+        Baseado na lógica do arquivo de referência.
+        """
+        try:
+            logger.info(f"Evento 13 - Desistência de acesso para {employee.name}")
+            
+            # Cancelar validação pendente se existir
+            cache_key = f"pending_validation_{employee.device_id}"
+            existing_validation = cache.get(cache_key)
+            
+            if existing_validation:
+                cache.delete(cache_key)
+                logger.info(f"Validação cancelada para {employee.name} - Usuário desistiu")
+                return {
+                    'success': True,
+                    'message': 'Validação cancelada - Usuário desistiu',
+                    'action': 'abandonment'
+                }
+            else:
+                logger.info(f"Desistência para {employee.name} - Nenhuma validação pendente")
+                return {
+                    'success': True,
+                    'message': 'Desistência registrada - Nenhuma validação pendente',
+                    'action': 'abandonment'
+                }
+                
+        except Exception as e:
+            logger.error(f"Erro ao processar desistência para {employee.name}: {e}")
+            return {
+                'success': False,
+                'message': str(e),
+                'action': 'error'
+            }
+    
+    def _process_unauthorized_access(self, employee: Employee, timestamp: datetime) -> Dict:
+        """
+        Processa acesso não autorizado - NEGAR ACESSO.
+        """
+        try:
+            logger.warning(f"Acesso não autorizado para {employee.name} - Negando acesso")
+            
+            return {
+                'success': False,
+                'message': 'Acesso não autorizado',
+                'action': 'deny'
+            }
+                
+        except Exception as e:
+            logger.error(f"Erro ao processar acesso não autorizado para {employee.name}: {e}")
+            return {
+                'success': False,
+                'message': str(e),
+                'action': 'error'
+            }
+    
+    def check_pending_giro_validations(self):
+        """
+        Verifica validações de giro pendentes.
+        Baseado na lógica do arquivo de referência (linhas 758-864).
+        """
+        try:
+            logger.debug("Verificando validações de giro pendentes...")
+            
+            # Buscar eventos de acesso (giros) do dispositivo
+            from apps.devices.device_client import DeviceClient
+            device_client = DeviceClient()
+            
+            try:
+                access_events = device_client.get_access_events()
+                
+                if access_events:
+                    logger.debug(f"Encontrados {len(access_events)} eventos de acesso")
+                    
+                    # Processar cada evento de giro
+                    for event in access_events:
+                        if event.get('event') == 'catra' and event.get('type') in ['TURN_LEFT', 'TURN_RIGHT']:
+                            self.process_giro_event(event)
+                else:
+                    logger.debug("Nenhum evento de acesso encontrado")
+                    
+            except Exception as e:
+                logger.error(f"Erro ao buscar eventos de acesso: {e}")
+            
+        except Exception as e:
+            logger.error(f"Erro ao verificar validações pendentes: {e}")
+    
+    def process_giro_event(self, event_data: dict) -> bool:
+        """
+        Processa eventos de giro da catraca.
+        Baseado na lógica do arquivo de referência (linhas 2806-2905).
+        """
+        try:
+            event_type = event_data.get('type', '')
+            event_timestamp = event_data.get('timestamp', 0)
+            device_id = event_data.get('device_id', 0)
+            
+            if event_type in ['TURN_RIGHT', 'TURN_LEFT']:
+                logger.info(f"Evento de giro detectado: {event_type}")
+                
+                # Buscar validação pendente para este dispositivo
+                # Como não temos acesso direto às chaves do cache, vamos buscar por todos os funcionários
+                from apps.employees.models import Employee
+                
+                employees = Employee.objects.filter(is_active=True)
+                for employee in employees:
+                    cache_key = f"pending_validation_{employee.device_id}"
+                    validation = cache.get(cache_key)
+                    
+                    if validation:
+                        logger.info(f"Validação pendente encontrada para {employee.name} - Processando giro")
+                        
+                        # Remover validação pendente do cache
+                        cache.delete(cache_key)
+                        
+                        # Processar entrada (criar sessão) - pular verificação de validação pois já foi confirmada
+                        result = self._process_entry_event_new(employee, TimezoneUtils.get_utc_now(), skip_validation_check=True)
+                        
+                        if result.get('success'):
+                            logger.info(f"Sessão criada para {employee.name} após giro {event_type}")
+                            return True
+                        else:
+                            logger.warning(f"Falha ao criar sessão para {employee.name}: {result.get('message')}")
+                            return False
+                
+                logger.info(f"Giro {event_type} processado em {event_timestamp} - Nenhuma validação pendente encontrada")
+                return True
+            else:
+                logger.debug(f"Evento não é giro: {event_type}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Erro ao processar evento de giro: {e}")
+            return False
+    
+    def _process_entry_event_new(self, employee: Employee, timestamp: datetime, skip_validation_check: bool = False) -> Dict:
+        """
+        Processa evento de entrada (nova lógica baseada em sessões).
+        REGRA RIGOROSA: APENAS permitir entrada se houver validação pendente (evento 7 + giro).
+        """
+        try:
+            # Verificar se há validação pendente para este usuário (exceto quando chamado após giro)
+            if not skip_validation_check:
+                cache_key = f"pending_validation_{employee.device_id}"
+                pending_validation = cache.get(cache_key)
+                
+                if pending_validation:
+                    # Remover validação pendente do cache
+                    cache.delete(cache_key)
+                    logger.info(f"Validação confirmada para {employee.name} - Processando entrada")
+                else:
+                    # SEM validação pendente - NEGAR ACESSO (regra rigorosa)
+                    logger.warning(f"Evento de entrada SEM validação pendente para {employee.name} - ACESSO NEGADO")
+                    return {
+                        'success': False,
+                        'message': 'Entrada ignorada - Sem validação pendente (evento 7 + giro obrigatório)',
+                        'action': 'deny'
+                    }
+            else:
+                logger.info(f"Validação confirmada para {employee.name} - Processando entrada (após giro)")
+            
             # Verificar se já tem sessão ativa
             session = session_service.get_user_session(employee)
             if session and session.state == 'active':

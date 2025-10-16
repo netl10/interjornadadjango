@@ -31,8 +31,8 @@ class EmployeeSession(models.Model):
     rest_duration_minutes = models.IntegerField(verbose_name="Duração de Interjornada (min)")
     
     # Metadados
-    created_at = models.DateTimeField(verbose_name="Criado em")
-    updated_at = models.DateTimeField(verbose_name="Atualizado em")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
     
     class Meta:
         verbose_name = "Sessão de Funcionário"

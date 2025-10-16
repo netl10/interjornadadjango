@@ -72,14 +72,16 @@ class GroupService:
                 logger.info(f"Funcionário {employee.name} está no grupo de exceção - Ignorando regras de interjornada")
                 return False  # Não mover usuários da whitelist
             
-                # Salvar grupo original se ainda não foi salvo
-                if not hasattr(employee, 'original_group') or not employee.original_group:
-                    original_group = self.get_original_group(employee)
-                    if original_group:
-                        employee.original_group = original_group
-                        employee.save(update_fields=['original_group'])
-                        logger.info(f"Grupo original salvo para {employee.name}: {original_group.name}")
-                
+            # CRÍTICO: Salvar grupo original ANTES de mover para blacklist
+            if not hasattr(employee, 'original_group') or not employee.original_group:
+                original_group = self.get_original_group(employee)
+                if original_group:
+                    employee.original_group = original_group
+                    employee.save(update_fields=['original_group'])
+                    logger.info(f"Grupo original salvo para {employee.name}: {original_group.name}")
+                else:
+                    logger.warning(f"Não foi possível determinar grupo original para {employee.name}")
+            
             # Verificar se blacklist_group existe e tem device_group_id
             if not self.blacklist_group:
                 logger.error("Grupo de blacklist não encontrado")
@@ -96,11 +98,14 @@ class GroupService:
                 client = DeviceClient()
                 if client.login():
                     # Mover no dispositivo
-                    original_group_id = employee.original_group.device_group_id if employee.original_group and employee.original_group.device_group_id else 1
+                    # Obter grupo atual na catraca
+                    user_groups = client.get_user_groups(employee.device_id)
+                    current_group_id = user_groups[0].get('group_id') if user_groups else 1
+                    
                     device_move_success = client.move_user_to_group(
                         employee.device_id, 
                         self.blacklist_group.device_group_id, 
-                        original_group_id
+                        current_group_id
                     )
                     if device_move_success:
                         logger.info(f"Funcionário {employee.name} movido para blacklist no dispositivo (ID: {self.blacklist_group.device_group_id})")
@@ -193,11 +198,17 @@ class GroupService:
                 client = DeviceClient()
                 if client.login():
                     # Restaurar no dispositivo
-                    original_group_id = employee.original_group.device_group_id if employee.original_group and employee.original_group.device_group_id else 1
+                    # Obter grupo atual na catraca
+                    user_groups = client.get_user_groups(employee.device_id)
+                    current_group_id = user_groups[0].get('group_id') if user_groups else 2
+                    
+                    # Sempre usar grupo 1 (padrão) na catraca para evitar problemas de sincronização
+                    original_group_id = 1
+                    
                     device_restore_success = client.move_user_to_group(
                         employee.device_id, 
                         original_group_id, 
-                        self.blacklist_group.device_group_id if self.blacklist_group and self.blacklist_group.device_group_id else None
+                        current_group_id
                     )
                     if device_restore_success:
                         logger.info(f"Funcionário {employee.name} restaurado do blacklist no dispositivo (ID: {original_group_id})")

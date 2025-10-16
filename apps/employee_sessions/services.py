@@ -253,7 +253,12 @@ class SessionService:
             
             for session in expired_sessions:
                 try:
-                    logger.info(f"Sessão expirada detectada para {session.employee.name} - removendo automaticamente")
+                    logger.info(f"Sessão expirada detectada para {session.employee.name} - liberando automaticamente")
+                    
+                    # CRÍTICO: Restaurar do blacklist antes de deletar a sessão
+                    from apps.employees.group_service import group_service
+                    blacklist_success = group_service.restore_from_blacklist(session.employee)
+                    
                     SystemLog.objects.create(
                         level='INFO',
                         category='interjornada',
@@ -264,31 +269,62 @@ class SessionService:
                             'session_id': session.id,
                             'work_duration': session.work_duration_minutes,
                             'rest_duration': session.rest_duration_minutes,
-                            'finalized_at': now.isoformat()
+                            'finalized_at': now.isoformat(),
+                            'blacklist_restored': blacklist_success
                         }
                     )
+                    
+                    # Deletar sessão após restaurar do blacklist
                     session.delete()
+                    
+                    if blacklist_success:
+                        logger.info(f"Funcionário {session.employee.name} restaurado do blacklist automaticamente")
+                    else:
+                        logger.warning(f"Falha ao restaurar {session.employee.name} do blacklist automaticamente")
+                        
                 except Exception as e:
                     logger.error(f"Erro ao remover sessão expirada de {session.employee.name}: {e}")
             
             # Verificar sessões ativas que excederam o tempo de acesso livre
             config = self.get_system_config()
-            sessions_to_block = EmployeeSession.objects.filter(
+            sessions_pending_exit = EmployeeSession.objects.filter(
                 state='active',
                 first_access__lte=now - timedelta(minutes=config.liberado_minutes)
             ).select_related('employee')
             
-            for session in sessions_to_block:
+            for session in sessions_pending_exit:
                 try:
-                    logger.info(f"Sessão de {session.employee.name} excedeu tempo livre. Iniciando interjornada.")
-                    # Chamar o serviço de interjornada para bloquear o usuário
-                    success = self.block_user_for_interjornada(session.employee, now)
-                    if success:
-                        logger.info(f"Usuário {session.employee.name} bloqueado para interjornada automaticamente")
-                    else:
-                        logger.warning(f"Falha ao bloquear usuário {session.employee.name} para interjornada")
+                    logger.info(f"Sessão de {session.employee.name} excedeu tempo livre. Aguardando saída Portal 2.")
+                    # Mudar estado para pending_rest (aguardando saída)
+                    session.state = 'pending_rest'
+                    session.save(update_fields=['state'])
+                    logger.info(f"Usuário {session.employee.name} em estado 'aguardando saída'")
                 except Exception as e:
-                    logger.error(f"Erro ao bloquear usuário {session.employee.name} para interjornada: {e}")
+                    logger.error(f"Erro ao atualizar estado da sessão de {session.employee.name}: {e}")
+            
+            # Verificar sessões pending_rest que excederam o tempo total de trabalho
+            sessions_pending_block = EmployeeSession.objects.filter(
+                state='pending_rest',
+                first_access__lte=now - timedelta(minutes=config.liberado_minutes + config.bloqueado_minutes)
+            ).select_related('employee')
+            
+            for session in sessions_pending_block:
+                try:
+                    logger.info(f"Sessão de {session.employee.name} excedeu tempo total. Bloqueando automaticamente.")
+                    
+                    # Bloquear usuário para interjornada
+                    from apps.employees.group_service import group_service
+                    blacklist_success = group_service.move_to_blacklist(session.employee)
+                    
+                    # Atualizar sessão para bloqueada
+                    session.state = 'blocked'
+                    session.block_start = now
+                    session.return_time = now + timedelta(minutes=config.bloqueado_minutes)
+                    session.save(update_fields=['state', 'block_start', 'return_time'])
+                    
+                    logger.info(f"Usuário {session.employee.name} bloqueado automaticamente (blacklist: {blacklist_success})")
+                except Exception as e:
+                    logger.error(f"Erro ao bloquear sessão de {session.employee.name}: {e}")
             
             # Garantir que sessões ativas tenham last_access atualizado
             active_sessions = EmployeeSession.objects.filter(state='active').select_related('employee')
