@@ -12,4 +12,5 @@ urlpatterns = [
     path('interjornada/', views.sessoes_interjornada, name='sessoes_interjornada'),
     path('api/sessoes-publicas/', views.api_sessoes_publicas, name='api_sessoes_publicas'),
     path('api/sessoes-ativas/', views.api_sessoes_ativas, name='api_sessoes_ativas'),
+    path('api/session-counts/', views.api_session_counts, name='api_session_counts'),
 ]

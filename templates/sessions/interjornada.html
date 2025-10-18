@@ -18,163 +18,39 @@
             min-height: 100vh;
             color: #2c3e50;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
+        /* Container principal - agora ocupa toda a tela */
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100vw;
+            height: 100vh;
             padding: 20px;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            font-size: 3em;
-            margin-bottom: 10px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header p {
-            color: #6c757d;
-            font-size: 1.2em;
-            font-weight: 300;
-        }
-
-        /* Status bar */
-        .status-bar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px 30px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            flex-direction: column;
         }
 
-        .status-info {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1em;
-            font-weight: 500;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #28a745;
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-        }
-
-        .status-dot.offline {
-            background: #dc3545;
-            animation: none;
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
-        }
-
-        @keyframes pulse {
-            0%, 100% { 
-                opacity: 1; 
-                transform: scale(1);
-            }
-            50% { 
-                opacity: 0.7; 
-                transform: scale(1.1);
-            }
-        }
-
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .switch {
-            position: relative;
-            width: 50px;
-            height: 28px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #ccc, #999);
-            transition: .4s;
-            border-radius: 28px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background: white;
-            transition: .4s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        input:checked + .slider {
-            background: linear-gradient(135deg, #28a745, #20c997);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(22px);
-        }
-
-        /* Grid de sessões */
+        /* Grid de sessões - ocupa todo o espaço disponível */
         .sessions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
         }
 
         /* Card de sessão */
         .session-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            border-left: 6px solid;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
@@ -185,34 +61,78 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-            animation: shimmer 3s infinite;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.9) 20%, 
+                rgba(255, 255, 255, 1) 50%, 
+                rgba(255, 255, 255, 0.9) 80%, 
+                transparent 100%);
+            animation: shimmer 4s ease-in-out infinite;
+        }
+
+        .session-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 50%, 
+                rgba(0, 0, 0, 0.02) 100%);
+            pointer-events: none;
         }
 
         @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
         }
 
         .session-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.15),
+                0 8px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
 
         .session-card.active {
-            border-left-color: #28a745;
-            background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #28a745;
+            background: linear-gradient(145deg, 
+                rgba(40, 167, 69, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 30%, 
+                rgba(40, 167, 69, 0.03) 100%);
+            box-shadow: 
+                0 8px 32px rgba(40, 167, 69, 0.15),
+                0 2px 8px rgba(40, 167, 69, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         .session-card.pending-rest {
-            border-left-color: #ffc107;
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #ffc107;
+            background: linear-gradient(145deg, 
+                rgba(255, 193, 7, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 30%, 
+                rgba(255, 193, 7, 0.03) 100%);
+            box-shadow: 
+                0 8px 32px rgba(255, 193, 7, 0.15),
+                0 2px 8px rgba(255, 193, 7, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         .session-card.blocked {
-            border-left-color: #dc3545;
-            background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #dc3545;
+            background: linear-gradient(145deg, 
+                rgba(220, 53, 69, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 30%, 
+                rgba(220, 53, 69, 0.03) 100%);
+            box-shadow: 
+                0 8px 32px rgba(220, 53, 69, 0.15),
+                0 2px 8px rgba(220, 53, 69, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         /* Header do card */
@@ -220,24 +140,81 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .employee-info h3 {
-            font-size: 1.4em;
+            font-size: 1.3em;
             font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 6px;
+            color: #1a1a1a;
+            margin: 0;
+            letter-spacing: -0.02em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            min-height: 1.8em;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
         }
 
         .employee-id {
-            font-size: 0.9em;
+            font-size: 0.75em;
             color: #6c757d;
-            background: rgba(108, 117, 125, 0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(108, 117, 125, 0.12), rgba(108, 117, 125, 0.08));
+            padding: 4px 10px;
+            border-radius: 14px;
             display: inline-block;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(108, 117, 125, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .employee-id-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
             font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .employee-id-row.active {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(25, 135, 84, 0.9));
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .employee-id-row.pending-rest {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 152, 0, 0.9));
+            color: #212529;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .employee-id-row.blocked {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(200, 35, 51, 0.9));
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .id-label, .matricula-label {
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .id-value, .matricula-value {
+            font-weight: 700;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
         }
 
         .status-badge {
@@ -267,15 +244,18 @@
 
         /* Conteúdo do card */
         .card-content {
-            font-size: 0.95em;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 2;
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .info-row:last-child {
@@ -285,19 +265,30 @@
         .info-label {
             color: #6c757d;
             font-weight: 600;
+            font-size: 0.8em;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
 
         .info-value {
-            color: #2c3e50;
+            color: #1a1a1a;
             font-weight: 700;
+            font-size: 0.9em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .time-info {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05));
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 15px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.8) 0%, 
+                rgba(248, 249, 250, 0.9) 100%);
+            padding: 8px;
+            border-radius: 12px;
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
         }
 
         .time-highlight {
@@ -306,7 +297,53 @@
             font-size: 1.1em;
         }
 
-        /* Estado vazio */
+        /* Estilos para cronômetros */
+        .timer-elapsed, .timer-countdown {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
+            padding: 6px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-elapsed {
+            color: #28a745;
+            background: linear-gradient(135deg, 
+                rgba(40, 167, 69, 0.15), 
+                rgba(40, 167, 69, 0.08));
+            text-shadow: 0 1px 2px rgba(40, 167, 69, 0.3);
+        }
+
+        .timer-countdown {
+            color: #dc3545;
+            background: linear-gradient(135deg, 
+                rgba(220, 53, 69, 0.15), 
+                rgba(220, 53, 69, 0.08));
+            text-shadow: 0 1px 2px rgba(220, 53, 69, 0.3);
+        }
+
+        .timer-countdown.warning {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.2);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* Estado vazio - agora ocupa toda a tela */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -315,6 +352,11 @@
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .empty-state-icon {
@@ -339,25 +381,12 @@
         /* Responsividade */
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 10px;
             }
             
             .sessions-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .status-bar {
-                flex-direction: column;
-                gap: 20px;
-                align-items: stretch;
-            }
-            
-            .status-info {
-                justify-content: center;
-            }
-            
-            .header h1 {
-                font-size: 2.2em;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 15px;
             }
             
             .session-card {
@@ -366,12 +395,13 @@
         }
 
         @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.8em;
+            .container {
+                padding: 5px;
             }
             
-            .header p {
-                font-size: 1em;
+            .sessions-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
             
             .session-card {
@@ -393,39 +423,111 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Modal de Acesso Negado */
+        .access-denied-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        
+        .access-denied-modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content-access-denied {
+            background: linear-gradient(135deg, #dc3545 0%, #1d1d1d 100%);
+            color: white;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(220, 53, 69, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideIn 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modal-header-access-denied {
+            margin-bottom: 30px;
+        }
+        
+        .modal-header-access-denied h2 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .alert-icon-access-denied {
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-body-access-denied {
+            margin-bottom: 30px;
+        }
+        
+        .modal-body-access-denied p {
+            margin: 15px 0;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+        
+        .modal-body-access-denied strong {
+            color: #ffc107;
+            font-weight: 700;
+        }
+        
+        .modal-footer-access-denied {
+            text-align: center;
+        }
+        
+        .btn-close-access-denied {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+            color: #212529;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+        
+        .btn-close-access-denied:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>⏰ Interjornada</h1>
-            <p>Monitor de Sessões Ativas</p>
-        </div>
-        
-        <!-- Status bar -->
-        <div class="status-bar">
-            <div class="status-info">
-                <div class="status-item">
-                    <span id="monitor-status-dot" class="status-dot"></span>
-                    <span id="monitor-status-text">Monitor Online</span>
-                </div>
-                <div class="status-item">
-                    <span id="total-sessions">0</span>
-                    <span>Sessões Ativas</span>
-                </div>
-            </div>
-            
-            <div class="auto-refresh">
-                <label for="autoRefreshToggle">Auto-refresh:</label>
-                <label class="switch">
-                    <input type="checkbox" id="autoRefreshToggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-        
-        <!-- Container das sessões -->
+        <!-- Container das sessões - agora ocupa toda a tela -->
         <div id="sessions-container">
             <div class="empty-state" id="empty-state">
                 <div class="empty-state-icon">👥</div>
@@ -439,10 +541,29 @@
         </div>
     </div>
 
+    <!-- Modal de Acesso Negado -->
+    <div id="accessDeniedModal" class="access-denied-modal">
+        <div class="modal-content-access-denied">
+            <div class="modal-header-access-denied">
+                <div class="alert-icon-access-denied">🚫</div>
+                <h2>Acesso Negado!</h2>
+            </div>
+            <div class="modal-body-access-denied">
+                <p><strong>Colaborador:</strong> <span id="modalUserName"></span></p>
+                <p><strong>Matrícula:</strong> <span id="modalUserId"></span></p>
+                <p><strong>Horário:</strong> <span id="modalTimestamp"></span></p>
+            </div>
+            <div class="modal-footer-access-denied">
+                <button class="btn-close-access-denied" onclick="closeAccessDeniedModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let autoRefreshEnabled = true;
         let refreshInterval = 3000; // 3 segundos
         let lastSessionsData = [];
+        let processedAccessDeniedLogs = new Set(); // Para evitar mostrar o mesmo log múltiplas vezes
+        let isPageInitialized = false; // Flag para controlar se a página já foi inicializada
 
         // Formatar tempo
         function formatTime(minutes) {
@@ -452,6 +573,346 @@
                 const hours = Math.floor(minutes / 60);
                 const mins = minutes % 60;
                 return `${hours}h ${mins}min`;
+            }
+        }
+
+        // Formatar tempo em formato HH:MM:SS
+        function formatTimeDetailed(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            if (hours > 0) {
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Calcular tempo decorrido em segundos
+        function calculateElapsedSeconds(startTime) {
+            if (!startTime) {
+                console.warn('⚠️ startTime é null ou undefined');
+                return 0;
+            }
+            
+            console.log('🕐 Calculando tempo decorrido para:', startTime, 'tipo:', typeof startTime);
+            
+            try {
+                let start;
+                const now = new Date();
+                console.log('🕐 Hora atual:', now.toLocaleString());
+                
+                // Converter para string se necessário
+                const timeStr = String(startTime).trim();
+                console.log('🕐 String processada:', timeStr, 'comprimento:', timeStr.length);
+                
+                // Verificar se a string está vazia
+                if (timeStr === '' || timeStr === 'null' || timeStr === 'undefined') {
+                    console.warn('⚠️ String vazia ou inválida:', timeStr);
+                    return 0;
+                }
+                
+                // Tentar diferentes formatos de data
+                if (timeStr.includes('T')) {
+                    // Formato ISO: "2024-01-01T23:01:20"
+                    console.log('📅 Tentando formato ISO...');
+                    start = new Date(timeStr);
+                    console.log('📅 Data ISO criada:', start.toLocaleString(), 'válida:', !isNaN(start.getTime()));
+                } else if (timeStr.match(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/)) {
+                    // Formato brasileiro: "17/10/2025 23:20:07"
+                    console.log('📅 Formato brasileiro detectado (DD/MM/YYYY HH:MM:SS)');
+                    const [datePart, timePart] = timeStr.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    const [hours, minutes, seconds] = timePart.split(':');
+                    
+                    // Criar data no formato YYYY-MM-DD HH:MM:SS
+                    const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${hours}:${minutes}:${seconds}`;
+                    console.log('📅 Convertido para ISO:', isoString);
+                    start = new Date(isoString);
+                    console.log('📅 Data brasileira criada:', start.toLocaleString(), 'válida:', !isNaN(start.getTime()));
+                } else if (timeStr.includes(' ')) {
+                    // Formato: "2024-01-01 23:01:20"
+                    console.log('📅 Tentando formato com espaço...');
+                    start = new Date(timeStr);
+                    console.log('📅 Data com espaço criada:', start.toLocaleString(), 'válida:', !isNaN(start.getTime()));
+                } else if (timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                    // Formato: "23:01:20" - assumir data atual
+                    console.log('📅 Formato HH:MM:SS detectado');
+                    const [hours, minutes, seconds] = timeStr.split(':');
+                    console.log('📅 Partes extraídas:', { hours, minutes, seconds });
+                    
+                    // Validar se as partes são números válidos
+                    const h = parseInt(hours);
+                    const m = parseInt(minutes);
+                    const s = parseInt(seconds);
+                    
+                    if (isNaN(h) || isNaN(m) || isNaN(s) || h < 0 || h > 23 || m < 0 || m > 59 || s < 0 || s > 59) {
+                        console.error('❌ Horário inválido:', { h, m, s });
+                        return 0;
+                    }
+                    
+                    // Criar data para hoje com a hora especificada
+                    const today = new Date();
+                    start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, s);
+                    console.log('📅 Data HH:MM:SS criada:', start.toLocaleString(), 'válida:', !isNaN(start.getTime()));
+                    
+                    // Se a hora de início for maior que a hora atual, assumir que foi ontem
+                    if (start > now) {
+                        console.log('⚠️ Hora de início é maior que atual, assumindo que foi ontem');
+                        start.setDate(start.getDate() - 1);
+                        console.log('📅 Data ajustada para ontem:', start.toLocaleString());
+                    }
+                } else {
+                    console.error('❌ Formato de data não reconhecido:', timeStr);
+                    console.log('🔍 Tentando criar data diretamente...');
+                    start = new Date(timeStr);
+                    console.log('📅 Data criada diretamente:', start.toLocaleString(), 'válida:', !isNaN(start.getTime()));
+                }
+                
+                // Verificar se a data é válida
+                if (isNaN(start.getTime())) {
+                    console.error('❌ Data inválida criada para:', timeStr);
+                    console.error('❌ Valor original:', startTime);
+                    console.error('❌ Tipo original:', typeof startTime);
+                    return 0;
+                }
+                
+                console.log('🕐 Data de início válida:', start.toLocaleString());
+                console.log('🕐 Hora atual:', now.toLocaleString());
+                console.log('🕐 Diferença em ms:', now - start);
+                
+                const elapsed = Math.floor((now - start) / 1000);
+                console.log('⏱️ Tempo decorrido calculado:', elapsed, 'segundos');
+                
+                // Se o tempo for negativo, pode ser que a data de início seja do dia seguinte
+                if (elapsed < 0) {
+                    console.log('⚠️ Tempo negativo detectado, tentando adicionar 24 horas...');
+                    const tomorrow = new Date(start);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const elapsedTomorrow = Math.floor((now - tomorrow) / 1000);
+                    console.log('⏱️ Tempo com +24h:', elapsedTomorrow, 'segundos');
+                    return Math.max(0, elapsedTomorrow);
+                }
+                
+                return Math.max(0, elapsed);
+            } catch (error) {
+                console.error('❌ Erro ao calcular tempo decorrido:', error, 'startTime:', startTime);
+                return 0;
+            }
+        }
+
+        // Calcular tempo restante em segundos
+        function calculateRemainingSeconds(returnTime) {
+            if (!returnTime) {
+                console.warn('⚠️ returnTime é null ou undefined');
+                return 0;
+            }
+            
+            console.log('⏰ Calculando tempo restante para:', returnTime, 'tipo:', typeof returnTime);
+            
+            try {
+                let returnDate;
+                const now = new Date();
+                
+                // Converter para string se necessário
+                const timeStr = String(returnTime).trim();
+                console.log('⏰ String processada:', timeStr, 'comprimento:', timeStr.length);
+                
+                // Verificar se a string está vazia
+                if (timeStr === '' || timeStr === 'null' || timeStr === 'undefined') {
+                    console.warn('⚠️ String vazia ou inválida:', timeStr);
+                    return 0;
+                }
+                
+                // Tentar diferentes formatos de data
+                if (timeStr.includes('T')) {
+                    // Formato ISO: "2024-01-01T22:46:01"
+                    console.log('📅 Tentando formato ISO...');
+                    returnDate = new Date(timeStr);
+                    console.log('📅 Data ISO criada:', returnDate.toLocaleString(), 'válida:', !isNaN(returnDate.getTime()));
+                } else if (timeStr.match(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/)) {
+                    // Formato brasileiro: "17/10/2025 23:33:44"
+                    console.log('📅 Formato brasileiro detectado (DD/MM/YYYY HH:MM:SS)');
+                    const [datePart, timePart] = timeStr.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    const [hours, minutes, seconds] = timePart.split(':');
+                    
+                    // Criar data no formato YYYY-MM-DD HH:MM:SS
+                    const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${hours}:${minutes}:${seconds}`;
+                    console.log('📅 Convertido para ISO:', isoString);
+                    returnDate = new Date(isoString);
+                    console.log('📅 Data brasileira criada:', returnDate.toLocaleString(), 'válida:', !isNaN(returnDate.getTime()));
+                } else if (timeStr.includes(' ')) {
+                    // Formato: "2024-01-01 22:46:01"
+                    console.log('📅 Tentando formato com espaço...');
+                    returnDate = new Date(timeStr);
+                    console.log('📅 Data com espaço criada:', returnDate.toLocaleString(), 'válida:', !isNaN(returnDate.getTime()));
+                } else if (timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                    // Formato: "22:46:01" - assumir data atual
+                    console.log('📅 Formato HH:MM:SS detectado');
+                    const [hours, minutes, seconds] = timeStr.split(':');
+                    console.log('📅 Partes extraídas:', { hours, minutes, seconds });
+                    
+                    // Validar se as partes são números válidos
+                    const h = parseInt(hours);
+                    const m = parseInt(minutes);
+                    const s = parseInt(seconds);
+                    
+                    if (isNaN(h) || isNaN(m) || isNaN(s) || h < 0 || h > 23 || m < 0 || m > 59 || s < 0 || s > 59) {
+                        console.error('❌ Horário inválido:', { h, m, s });
+                        return 0;
+                    }
+                    
+                    const today = new Date();
+                    returnDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, s);
+                    console.log('📅 Data HH:MM:SS criada:', returnDate.toLocaleString(), 'válida:', !isNaN(returnDate.getTime()));
+                } else {
+                    console.error('❌ Formato de data não reconhecido:', timeStr);
+                    console.log('🔍 Tentando criar data diretamente...');
+                    returnDate = new Date(timeStr);
+                    console.log('📅 Data criada diretamente:', returnDate.toLocaleString(), 'válida:', !isNaN(returnDate.getTime()));
+                }
+                
+                // Verificar se a data é válida
+                if (isNaN(returnDate.getTime())) {
+                    console.error('❌ Data inválida criada para:', timeStr);
+                    console.error('❌ Valor original:', returnTime);
+                    console.error('❌ Tipo original:', typeof returnTime);
+                    return 0;
+                }
+                
+                console.log('⏰ Data de retorno válida:', returnDate.toLocaleString());
+                console.log('⏰ Hora atual:', now.toLocaleString());
+                console.log('⏰ Diferença em ms:', returnDate - now);
+                
+                const remaining = Math.floor((returnDate - now) / 1000);
+                console.log('⏱️ Tempo restante calculado:', remaining, 'segundos');
+                return Math.max(0, remaining);
+            } catch (error) {
+                console.error('❌ Erro ao calcular tempo restante:', error, 'returnTime:', returnTime);
+                return 0;
+            }
+        }
+
+        // Calcular tempo de retorno baseado no tempo de início + duração (8 horas = 480 minutos)
+        function calculateReturnTimeFromStart(startTime, workDurationMinutes = 480) {
+            if (!startTime) {
+                console.warn('⚠️ startTime é null para calcular tempo de retorno');
+                return null;
+            }
+            
+            console.log('🔄 Calculando tempo de retorno para:', startTime, 'duração:', workDurationMinutes, 'minutos');
+            
+            try {
+                let start;
+                
+                // Verificar se é formato brasileiro (dd/mm/yyyy hh:mm:ss)
+                if (startTime.match(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/)) {
+                    const [datePart, timePart] = startTime.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    const [hours, minutes, seconds] = timePart.split(':');
+                    
+                    // Criar data no formato correto (mês é 0-indexado)
+                    start = new Date(
+                        parseInt(year), 
+                        parseInt(month) - 1, 
+                        parseInt(day), 
+                        parseInt(hours), 
+                        parseInt(minutes), 
+                        parseInt(seconds)
+                    );
+                    console.log('📅 Parse formato brasileiro:', startTime, '->', start);
+                }
+                // Verificar se é formato ISO (com T)
+                else if (startTime.includes('T')) {
+                    start = new Date(startTime);
+                    console.log('📅 Parse formato ISO:', startTime, '->', start);
+                }
+                // Verificar se é formato com espaço (yyyy-mm-dd hh:mm:ss)
+                else if (startTime.includes(' ') && startTime.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)) {
+                    start = new Date(startTime);
+                    console.log('📅 Parse formato com espaço:', startTime, '->', start);
+                }
+                // Verificar se é apenas hora (hh:mm:ss)
+                else if (startTime.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                    const today = new Date();
+                    const [hours, minutes, seconds] = startTime.split(':');
+                    start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                                   parseInt(hours), parseInt(minutes), parseInt(seconds));
+                    console.log('📅 Parse apenas hora:', startTime, '->', start);
+                }
+                // Tentar parse genérico
+                else {
+                    start = new Date(startTime);
+                    console.log('📅 Parse genérico:', startTime, '->', start);
+                }
+                
+                // Verificar se a data é válida
+                if (isNaN(start.getTime())) {
+                    console.error('❌ Data inválida criada para tempo de retorno:', start, 'de:', startTime);
+                    return null;
+                }
+                
+                // Adicionar duração do trabalho
+                const returnTime = new Date(start.getTime() + (workDurationMinutes * 60 * 1000));
+                console.log('⏰ Tempo de retorno calculado:', returnTime.toLocaleString());
+                return returnTime;
+            } catch (error) {
+                console.error('❌ Erro ao calcular tempo de retorno:', error, 'startTime:', startTime);
+                return null;
+            }
+        }
+
+        // Calcular tempo de liberação baseado no tempo de bloqueio + duração da interjornada (1 hora = 60 minutos)
+        function calculateReturnTimeFromBlock(blockTime, interjornadaDurationMinutes = 60) {
+            if (!blockTime) {
+                console.warn('⚠️ blockTime é null para calcular tempo de liberação');
+                return null;
+            }
+            
+            console.log('🔄 Calculando tempo de liberação para interjornada:', blockTime, 'duração:', interjornadaDurationMinutes, 'minutos');
+            
+            try {
+                let block;
+                
+                // Usar a mesma lógica da função calculateElapsedSeconds
+                if (blockTime.includes('T')) {
+                    block = new Date(blockTime);
+                } else if (blockTime.match(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/)) {
+                    // Formato brasileiro: "17/10/2025 23:33:44"
+                    const [datePart, timePart] = blockTime.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    const [hours, minutes, seconds] = timePart.split(':');
+                    
+                    // Criar data no formato YYYY-MM-DD HH:MM:SS
+                    const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${hours}:${minutes}:${seconds}`;
+                    block = new Date(isoString);
+                } else if (blockTime.includes(' ')) {
+                    block = new Date(blockTime);
+                } else if (blockTime.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                    const today = new Date();
+                    const [hours, minutes, seconds] = blockTime.split(':');
+                    block = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+                                   parseInt(hours), parseInt(minutes), parseInt(seconds));
+                } else {
+                    console.error('❌ Formato de data não reconhecido para tempo de bloqueio:', blockTime);
+                    return null;
+                }
+                
+                // Verificar se a data é válida
+                if (isNaN(block.getTime())) {
+                    console.error('❌ Data inválida criada para tempo de bloqueio:', block);
+                    return null;
+                }
+                
+                // Adicionar duração da interjornada
+                const returnTime = new Date(block.getTime() + (interjornadaDurationMinutes * 60 * 1000));
+                console.log('⏰ Tempo de liberação calculado:', returnTime.toLocaleString());
+                return returnTime;
+            } catch (error) {
+                console.error('❌ Erro ao calcular tempo de liberação:', error, 'blockTime:', blockTime);
+                return null;
             }
         }
 
@@ -491,40 +952,45 @@
 
         // Criar card de sessão
         function createSessionCard(session) {
-            const stateClass = getStateClass(session.state);
-            const stateText = getStateText(session.state);
+            // Verificar se uma sessão ativa passou do tempo mínimo e deve ser tratada como pending_rest
+            let actualState = session.state;
+            let actualStateClass = getStateClass(session.state);
+            let actualStateText = getStateText(session.state);
+            
+            // Se a sessão está ativa mas passou do tempo mínimo, tratar como pending_rest
+            if (session.state === 'active' && session.tempo_restante_interjornada === null) {
+                actualState = 'pending_rest';
+                actualStateClass = 'pending-rest';
+                actualStateText = 'Aguardando Saída';
+                console.log(`🔄 Sessão ${session.employee_name} passou do tempo mínimo - mudando para "Aguardando Saída"`);
+            }
             
             let timeInfo = '';
             
-            if (session.state === 'active') {
-                if (session.tempo_restante_interjornada !== null) {
+            if (actualState === 'active') {
+                // Sessão ativa com tempo restante
                     timeInfo = `
                         <div class="time-info">
                             <div class="info-row">
                                 <span class="info-label">Tempo decorrido:</span>
-                                <span class="info-value">${formatTime(session.tempo_decorrido_minutos)}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Pode sair em:</span>
-                                <span class="info-value time-highlight">${formatTime(session.tempo_restante_interjornada)}</span>
+                                <span class="info-value timer-elapsed" data-start-time="${session.first_access}">00:00</span>
                             </div>
                         </div>
                     `;
-                } else {
+            } else if (actualState === 'pending_rest') {
                     timeInfo = `
                         <div class="time-info">
                             <div class="info-row">
                                 <span class="info-label">Tempo decorrido:</span>
-                                <span class="info-value">${formatTime(session.tempo_decorrido_minutos)}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Status:</span>
-                                <span class="info-value time-highlight">Pode sair!</span>
-                            </div>
+                                <span class="info-value timer-elapsed" data-start-time="${session.first_access}">00:00</span>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             } else if (session.state === 'blocked') {
+                // Para interjornada, calcular tempo de liberação baseado no tempo de bloqueio + 1 hora
+                const blockTime = session.block_start;
+                const returnTime = session.return_time || calculateReturnTimeFromBlock(blockTime);
+                
                 timeInfo = `
                     <div class="time-info">
                         <div class="info-row">
@@ -532,32 +998,35 @@
                             <span class="info-value">${formatTimestamp(session.block_start)}</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Libera em:</span>
-                            <span class="info-value time-highlight">${formatTime(session.tempo_restante_liberacao)}</span>
+                            <span class="info-label">Tempo restante:</span>
+                            <span class="info-value timer-countdown" data-return-time="${session.return_time}">00:00</span>
                         </div>
                     </div>
                 `;
             }
 
+            // Para interjornada, não mostrar "Iniciado em"
+            const showStartTime = actualState !== 'blocked';
+
             return `
-                <div class="session-card ${stateClass}" data-session-id="${session.id}">
+                <div class="session-card ${actualStateClass}" data-session-id="${session.id}">
                     <div class="card-header">
                         <div class="employee-info">
+                <div class="employee-id-row ${actualStateClass}">
+                    <span class="id-label">ID:</span>
+                    <span class="id-value">${session.employee_id}</span>
+                    <span class="matricula-label">Matrícula:</span>
+                    <span class="matricula-value">${session.employee_id}</span>
+                </div>
                             <h3>${session.employee_name}</h3>
-                            <span class="employee-id">ID: ${session.employee_id}</span>
                         </div>
-                        <span class="status-badge ${stateClass}">${stateText}</span>
                     </div>
                     
                     <div class="card-content">
+                        ${showStartTime ? `
                         <div class="info-row">
                             <span class="info-label">Iniciado em:</span>
                             <span class="info-value">${formatTimestamp(session.first_access)}</span>
-                        </div>
-                        ${session.last_access ? `
-                            <div class="info-row">
-                                <span class="info-label">Último acesso:</span>
-                                <span class="info-value">${formatTimestamp(session.last_access)}</span>
                             </div>
                         ` : ''}
                         ${timeInfo}
@@ -568,24 +1037,96 @@
 
         // Buscar sessões
         async function fetchSessions() {
-            if (!autoRefreshEnabled) return;
-
             try {
+                console.log('🔄 fetchSessions() executando...', new Date().toLocaleTimeString());
                 const response = await fetch('/api/sessoes-publicas/');
                 const data = await response.json();
+                console.log('📊 Dados recebidos:', data);
 
                 if (data.success) {
-                    // Atualizar contador
-                    document.getElementById('total-sessions').textContent = data.total_sessoes;
-
-                    // Verificar mudanças
+                    // Verificar mudanças nos IDs das sessões
                     const currentIds = data.sessoes.map(s => s.id).sort();
                     const lastIds = lastSessionsData.map(s => s.id).sort();
-                    const hasChanges = JSON.stringify(currentIds) !== JSON.stringify(lastIds);
+                    const hasIdChanges = JSON.stringify(currentIds) !== JSON.stringify(lastIds);
                     
-                    if (hasChanges || data.sessoes.length === 0) {
+                    console.log('🔍 Verificando mudanças:', {
+                        currentIds: currentIds,
+                        lastIds: lastIds,
+                        hasIdChanges: hasIdChanges,
+                        currentSessionsCount: data.sessoes.length,
+                        lastSessionsCount: lastSessionsData.length
+                    });
+                    
+                    // Verificar mudanças de estado (para transições automáticas de status)
+                    let hasStateChanges = false;
+                    if (lastSessionsData.length > 0 && !hasIdChanges) {
+                        for (const currentSession of data.sessoes) {
+                            const lastSession = lastSessionsData.find(s => s.id === currentSession.id);
+                            if (lastSession) {
+                                // Verificar mudança de estado direta
+                                if (lastSession.state !== currentSession.state) {
+                                    console.log(`🔄 Mudança de estado detectada: ${currentSession.employee_name} - ${lastSession.state} → ${currentSession.state}`);
+                                    hasStateChanges = true;
+                                    break;
+                                }
+                                
+                                // Verificar se uma sessão ativa passou do tempo mínimo (transição visual)
+                                const wasActiveWithTime = lastSession.state === 'active' && lastSession.tempo_restante_interjornada !== null;
+                                const isActiveWithoutTime = currentSession.state === 'active' && currentSession.tempo_restante_interjornada === null;
+                                
+                                if (wasActiveWithTime && isActiveWithoutTime) {
+                                    console.log(`🔄 Transição visual detectada: ${currentSession.employee_name} passou do tempo mínimo`);
+                                    hasStateChanges = true;
+                                    break;
+                                }
+                                
+                                // Verificar mudanças em campos importantes que afetam a exibição
+                                const importantFields = ['tempo_restante_interjornada', 'tempo_restante_liberacao', 'return_time', 'block_start', 'last_access'];
+                                for (const field of importantFields) {
+                                    const lastValue = lastSession[field];
+                                    const currentValue = currentSession[field];
+                                    
+                                    // Comparação mais robusta para diferentes tipos de dados
+                                    let valuesAreDifferent = false;
+                                    
+                                    if (lastValue === null && currentValue === null) {
+                                        valuesAreDifferent = false;
+                                    } else if (lastValue === null || currentValue === null) {
+                                        valuesAreDifferent = true;
+                                    } else if (typeof lastValue === 'object' && typeof currentValue === 'object') {
+                                        valuesAreDifferent = JSON.stringify(lastValue) !== JSON.stringify(currentValue);
+                                    } else {
+                                        valuesAreDifferent = lastValue !== currentValue;
+                                    }
+                                    
+                                    if (valuesAreDifferent) {
+                                        console.log(`🔄 Mudança em ${field} detectada: ${currentSession.employee_name} - ${lastValue} → ${currentValue}`);
+                                        hasStateChanges = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (hasStateChanges) break;
+                            }
+                        }
+                    }
+                    
+                    const hasChanges = hasIdChanges || hasStateChanges;
+                    
+                    console.log('📋 Resultado da verificação:', {
+                        hasIdChanges: hasIdChanges,
+                        hasStateChanges: hasStateChanges,
+                        hasChanges: hasChanges,
+                        willUpdate: hasChanges || data.sessoes.length === 0
+                    });
+                    
+                    // Forçar atualização se houver mudanças ou se for a primeira vez
+                    if (hasChanges || data.sessoes.length === 0 || lastSessionsData.length === 0) {
+                        console.log('🔄 Atualizando exibição das sessões...');
                         updateSessionsDisplay(data.sessoes);
                         lastSessionsData = data.sessoes;
+                    } else {
+                        console.log('📊 Nenhuma mudança detectada - mantendo exibição atual');
                     }
 
                     updateMonitorStatus(true);
@@ -606,46 +1147,661 @@
             const grid = document.getElementById('sessions-grid');
 
             if (sessions.length === 0) {
-                emptyState.style.display = 'block';
+                emptyState.style.display = 'flex';
                 grid.style.display = 'none';
             } else {
                 emptyState.style.display = 'none';
                 grid.style.display = 'grid';
                 
                 grid.innerHTML = '';
-                sessions.forEach(session => {
+                
+                // Ordenar sessões: bloqueados primeiro (mais antigo), depois pendentes, depois ativos
+                const sortedSessions = sessions.sort((a, b) => {
+                    // 1. Bloqueados primeiro (ordenados por horário mais antigo)
+                    if (a.state === 'blocked' && b.state !== 'blocked') return -1;
+                    if (b.state === 'blocked' && a.state !== 'blocked') return 1;
+                    if (a.state === 'blocked' && b.state === 'blocked') {
+                        return new Date(a.block_start) - new Date(b.block_start);
+                    }
+                    
+                    // 2. Pendentes de saída
+                    if (a.state === 'pending_rest' && b.state !== 'pending_rest') return -1;
+                    if (b.state === 'pending_rest' && a.state !== 'pending_rest') return 1;
+                    
+                    // 3. Ativos (ordenados por horário mais antigo)
+                    if (a.state === 'active' && b.state === 'active') {
+                        return new Date(a.first_access) - new Date(b.first_access);
+                    }
+                    
+                    return 0;
+                });
+                
+                sortedSessions.forEach(session => {
+                    // Debug: mostrar dados da sessão
+                    console.log('📊 Dados da sessão:', {
+                        id: session.id,
+                        employee_name: session.employee_name,
+                        state: session.state,
+                        first_access: session.first_access,
+                        return_time: session.return_time,
+                        block_start: session.block_start
+                    });
+                    
+                    // Debug detalhado dos timestamps
+                    console.log('🕐 Debug de timestamps:');
+                    console.log('  - first_access:', session.first_access, 'tipo:', typeof session.first_access);
+                    console.log('  - return_time:', session.return_time, 'tipo:', typeof session.return_time);
+                    console.log('  - block_start:', session.block_start, 'tipo:', typeof session.block_start);
+                    
+                    // Testar cálculo imediatamente
+                    if (session.first_access) {
+                        console.log('🧪 Testando cálculo imediato para:', session.first_access);
+                        const testResult = calculateElapsedSeconds(session.first_access);
+                        console.log('🧪 Resultado do teste:', testResult, 'segundos');
+                    }
+                    
                     const cardHtml = createSessionCard(session);
                     grid.insertAdjacentHTML('beforeend', cardHtml);
                 });
+                
+                // Atualizar cronômetros imediatamente após criar os cards
+                setTimeout(() => {
+                    updateTimers();
+                }, 100);
             }
         }
 
-        // Atualizar status do monitor
+        // Atualizar status do monitor (simplificado)
         function updateMonitorStatus(isOnline) {
-            const statusText = document.getElementById('monitor-status-text');
-            const statusDot = document.getElementById('monitor-status-dot');
+            // Status do monitor removido da interface
+            // Mantido apenas para compatibilidade com o código existente
+        }
+
+        // Variável para controlar o áudio de acesso negado
+        let accessDeniedAudio = null;
+        let audioInitialized = false;
+        let userInteracted = false;
+
+        // Função para inicializar o áudio (chamada após interação do usuário)
+        function initializeAudio() {
+            if (audioInitialized) return;
             
-            if (isOnline) {
-                statusText.textContent = 'Monitor Online';
-                statusDot.className = 'status-dot';
-            } else {
-                statusText.textContent = 'Monitor Offline';
-                statusDot.className = 'status-dot offline';
+            try {
+                // Criar elemento de áudio
+                accessDeniedAudio = new Audio('/static/dashboard/agd.mp3');
+                accessDeniedAudio.preload = 'auto';
+                accessDeniedAudio.volume = 0.8; // Volume em 80%
+                
+                // Adicionar event listeners para debug
+                accessDeniedAudio.addEventListener('loadstart', () => {
+                    console.log('🔄 Iniciando carregamento do áudio');
+                });
+                
+                accessDeniedAudio.addEventListener('canplay', () => {
+                    console.log('✅ Áudio carregado e pronto para reproduzir');
+                });
+                
+                accessDeniedAudio.addEventListener('error', (e) => {
+                    console.error('❌ Erro no áudio:', e);
+                    // Tentar caminho alternativo
+                    if (accessDeniedAudio.src.includes('/static/dashboard/')) {
+                        console.log('🔄 Tentando caminho alternativo...');
+                        accessDeniedAudio.src = '/static/dashboard/agd.mp3';
+                    }
+                });
+                
+                accessDeniedAudio.addEventListener('play', () => {
+                    console.log('▶️ Áudio iniciado');
+                });
+                
+                accessDeniedAudio.addEventListener('ended', () => {
+                    console.log('🔚 Áudio finalizado - fechando modal');
+                    closeAccessDeniedModal();
+                });
+                
+                audioInitialized = true;
+                console.log('🎵 Áudio inicializado com sucesso');
+                
+            } catch (error) {
+                console.error('❌ Erro ao inicializar áudio:', error);
             }
         }
 
-        // Event listeners
-        document.getElementById('autoRefreshToggle').addEventListener('change', function() {
-            autoRefreshEnabled = this.checked;
-            if (autoRefreshEnabled) {
-                fetchSessions();
+        // Função para tocar o som de acesso negado
+        function playAccessDeniedSound() {
+            try {
+                console.log('🎵 Tentando reproduzir áudio de acesso negado...');
+                console.log('🔍 Estado atual:', {
+                    userInteracted: userInteracted,
+                    audioInitialized: audioInitialized,
+                    hasAudio: !!accessDeniedAudio
+                });
+                
+                // Se o usuário ainda não interagiu, tentar tocar silenciosamente para "desbloquear" o áudio
+                if (!userInteracted) {
+                    console.log('🔇 Tentando desbloquear áudio (sem som)...');
+                    if (!audioInitialized) {
+                        initializeAudio();
+                    }
+                    
+                    if (accessDeniedAudio) {
+                        accessDeniedAudio.volume = 0;
+                        accessDeniedAudio.play().then(() => {
+                            console.log('✅ Áudio desbloqueado com sucesso');
+                            userInteracted = true;
+                            accessDeniedAudio.volume = 0.8;
+                            accessDeniedAudio.currentTime = 0;
+                            accessDeniedAudio.play().catch(e => {
+                                console.warn('⚠️ Ainda não foi possível reproduzir com som:', e);
+                            });
+                        }).catch(error => {
+                            console.warn('⚠️ Não foi possível desbloquear áudio:', error);
+                        });
+                    }
+                    return;
+                }
+                
+                // Se o usuário já interagiu, tocar normalmente
+                if (!audioInitialized) {
+                    console.log('🔧 Inicializando áudio...');
+                    initializeAudio();
+                }
+                
+                if (accessDeniedAudio) {
+                    console.log('▶️ Reproduzindo áudio...');
+                    accessDeniedAudio.currentTime = 0; // Reiniciar do início
+                    accessDeniedAudio.volume = 0.8;
+                    
+                    const playPromise = accessDeniedAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('🔊 Som de acesso negado reproduzido com sucesso');
+                        }).catch(error => {
+                            console.error('❌ Erro ao reproduzir áudio de acesso negado:', error);
+                        });
+                    }
+                } else {
+                    console.warn('⚠️ Objeto de áudio não disponível');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao configurar áudio de acesso negado:', error);
             }
-        });
+        }
+
+        // Função para parar o som de acesso negado
+        function stopAccessDeniedSound() {
+            if (accessDeniedAudio) {
+                accessDeniedAudio.pause();
+                accessDeniedAudio.currentTime = 0;
+                console.log('🔇 Som de acesso negado parado');
+            }
+        }
+
+        // Função para mostrar modal de acesso negado
+        function showAccessDeniedModal(log) {
+            console.log('🚫 Mostrando modal de acesso negado para:', log.user_name);
+            
+            const modal = document.getElementById('accessDeniedModal');
+            if (!modal) {
+                console.error('❌ Modal não encontrado no DOM!');
+                return;
+            }
+            
+            // Preencher dados do modal
+            document.getElementById('modalUserName').textContent = log.user_name || 'Usuário não identificado';
+            document.getElementById('modalUserId').textContent = log.user_id || 'N/A';
+            
+            // Formatar timestamp corretamente para o modal (sem ajuste de timezone)
+            const modalTime = new Date(log.device_timestamp);
+            const modalTimeFormatted = modalTime.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'America/Sao_Paulo'
+            });
+            document.getElementById('modalTimestamp').textContent = modalTimeFormatted;
+            
+            // Mostrar modal
+            modal.classList.add('show');
+            
+            // Tocar o som de acesso negado
+            playAccessDeniedSound();
+        }
+
+        // Função para fechar modal de acesso negado
+        function closeAccessDeniedModal() {
+            const modal = document.getElementById('accessDeniedModal');
+            if (modal) {
+                modal.classList.remove('show');
+                console.log('✅ Modal de acesso negado fechado');
+            }
+            
+            // Parar o som de acesso negado
+            stopAccessDeniedSound();
+        }
+
+        // Função para verificar se um log é de acesso negado (apenas para usuários em interjornada)
+        function isAccessDeniedLog(log) {
+            // Verificar por event_type (6 = Acesso Negado, 8 = Acesso Bloqueado)
+            if (log.event_type === 6 || log.event_type === 8) {
+                // Verificar se o usuário está em interjornada (sessão bloqueada)
+                if (log.user_id && log.user_id !== 0) {
+                    return isUserInInterjornada(log.user_id);
+                }
+            }
+            
+            // Não mostrar modal para user_id = 0 (não cadastrado) - não é interjornada
+            // Não mostrar modal para outros tipos de negação que não sejam interjornada
+            return false;
+        }
+
+        // Função para verificar se um usuário está em interjornada (sessão bloqueada)
+        function isUserInInterjornada(userId) {
+            // Verificar nas sessões atuais se o usuário tem uma sessão bloqueada
+            if (lastSessionsData && lastSessionsData.length > 0) {
+                const userSession = lastSessionsData.find(session => 
+                    session.employee_id === userId && session.state === 'blocked'
+                );
+                return !!userSession;
+            }
+            return false;
+        }
+
+        // Função para buscar logs e detectar tentativas de acesso negado
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/v1/logs/api/logs-publicos/?limit=10');
+                const data = await response.json();
+
+                if (data.success && data.logs) {
+                    detectAccessAttempts(data.logs);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar logs:', error);
+            }
+        }
+
+        // Função para detectar tentativas de acesso negado
+        function detectAccessAttempts(logs) {
+            const now = new Date();
+            const thirtySecondsAgo = new Date(now.getTime() - 30000); // 30 segundos atrás
+            
+            console.log('🔍 Verificando logs para acesso negado. Total de logs:', logs.length);
+            console.log('📊 Estado da página:', {
+                isPageInitialized: isPageInitialized,
+                userInteracted: userInteracted,
+                audioInitialized: audioInitialized
+            });
+            
+            logs.forEach((log, index) => {
+                const isAccessDenied = isAccessDeniedLog(log);
+                const isProcessed = processedAccessDeniedLogs.has(log.id);
+                
+                console.log(`📋 Log ${index + 1}:`, {
+                    id: log.id,
+                    user_name: log.user_name,
+                    event_type: log.event_type,
+                    event_description: log.event_description,
+                    user_id: log.user_id,
+                    isAccessDenied: isAccessDenied,
+                    isProcessed: isProcessed
+                });
+                
+                if (isAccessDenied && !isProcessed) {
+                    processedAccessDeniedLogs.add(log.id);
+                    
+                    // Verificar se o log é recente (últimos 30 segundos)
+                    const logTime = new Date(log.device_timestamp);
+                    const isRecentLog = logTime > thirtySecondsAgo;
+                    
+                    console.log('🚫 Acesso negado detectado!', {
+                        user_name: log.user_name,
+                        log_id: log.id,
+                        isRecentLog: isRecentLog,
+                        logTime: logTime.toISOString(),
+                        thirtySecondsAgo: thirtySecondsAgo.toISOString()
+                    });
+                    
+                    // Só mostrar o modal se a página já foi inicializada E o log for recente
+                    if (isPageInitialized && isRecentLog) {
+                        console.log('✅ Exibindo modal de acesso negado para:', log.user_name);
+                    showAccessDeniedModal(log);
+                    } else if (!isPageInitialized) {
+                        console.log('🚫 Log de acesso negado detectado na inicialização (modal não será exibido):', log.user_name);
+                    } else if (!isRecentLog) {
+                        console.log('🚫 Log de acesso negado antigo (modal não será exibido):', log.user_name, 'timestamp:', log.device_timestamp);
+                    }
+                }
+            });
+        }
+
+        // Função para atualizar cronômetros em tempo real
+        function updateTimers() {
+            console.log('🔄 Atualizando cronômetros...');
+            
+            // Atualizar cronômetros de tempo decorrido
+            const elapsedTimers = document.querySelectorAll('.timer-elapsed');
+            console.log('⏱️ Encontrados', elapsedTimers.length, 'cronômetros de tempo decorrido');
+            
+            elapsedTimers.forEach((timer, index) => {
+                const startTime = timer.getAttribute('data-start-time');
+                console.log(`📊 Timer ${index + 1} - startTime:`, startTime);
+                
+                if (startTime) {
+                    const elapsedSeconds = calculateElapsedSeconds(startTime);
+                    const formattedTime = formatTimeDetailed(elapsedSeconds);
+                    timer.textContent = formattedTime;
+                    console.log(`✅ Timer ${index + 1} atualizado:`, formattedTime);
+                } else {
+                    timer.textContent = 'N/A';
+                    console.warn(`⚠️ Timer ${index + 1} sem startTime`);
+                }
+            });
+
+            // Atualizar cronômetros regressivos
+            const countdownTimers = document.querySelectorAll('.timer-countdown');
+            console.log('⏰ Encontrados', countdownTimers.length, 'cronômetros regressivos');
+            
+            countdownTimers.forEach((timer, index) => {
+                const returnTime = timer.getAttribute('data-return-time');
+                console.log(`📊 Countdown ${index + 1} - returnTime:`, returnTime);
+                
+                let remainingSeconds = 0;
+                
+                if (returnTime && returnTime !== 'null' && returnTime !== 'undefined' && returnTime.trim() !== '') {
+                    remainingSeconds = calculateRemainingSeconds(returnTime);
+                } else {
+                    // Se não há return_time, calcular baseado no contexto da sessão
+                    const sessionCard = timer.closest('.session-card');
+                    if (sessionCard) {
+                        const sessionState = sessionCard.classList.contains('blocked') ? 'blocked' : 'active';
+                        
+                        if (sessionState === 'blocked') {
+                            // Para interjornada, calcular baseado no tempo de bloqueio + 1 hora
+                            // Procurar especificamente pelo elemento que contém "Bloqueado desde"
+                            const blockStartLabel = Array.from(sessionCard.querySelectorAll('.info-label')).find(label => 
+                                label.textContent.includes('Bloqueado desde')
+                            );
+                            
+                            if (blockStartLabel) {
+                                const blockStartElement = blockStartLabel.nextElementSibling;
+                                if (blockStartElement && blockStartElement.classList.contains('info-value')) {
+                                    const blockTime = blockStartElement.textContent.trim();
+                                    console.log(`🔄 Calculando liberação para interjornada baseado em:`, blockTime);
+                                    
+                                    const calculatedReturnTime = calculateReturnTimeFromBlock(blockTime);
+                                    if (calculatedReturnTime) {
+                                        remainingSeconds = Math.floor((calculatedReturnTime - new Date()) / 1000);
+                                        remainingSeconds = Math.max(0, remainingSeconds);
+                                        console.log(`⏰ Liberação interjornada ${index + 1} calculada:`, remainingSeconds, 'segundos');
+                                    }
+                                }
+                            }
+                            
+                            // Fallback: tentar encontrar qualquer elemento com timestamp
+                            if (remainingSeconds === 0) {
+                                const allInfoValues = sessionCard.querySelectorAll('.info-value:not(.timer-elapsed):not(.timer-countdown)');
+                                for (let element of allInfoValues) {
+                                    const text = element.textContent.trim();
+                                    if (text.match(/\d{2}:\d{2}:\d{2}/)) {
+                                        console.log(`🔄 Fallback: usando timestamp encontrado:`, text);
+                                        const calculatedReturnTime = calculateReturnTimeFromBlock(text);
+                                        if (calculatedReturnTime) {
+                                            remainingSeconds = Math.floor((calculatedReturnTime - new Date()) / 1000);
+                                            remainingSeconds = Math.max(0, remainingSeconds);
+                                            console.log(`⏰ Liberação interjornada ${index + 1} (fallback) calculada:`, remainingSeconds, 'segundos');
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Para trabalho ativo, calcular baseado no tempo de início + 8 horas
+                            const startTimeElement = sessionCard.querySelector('.timer-elapsed');
+                            if (startTimeElement) {
+                                const startTime = startTimeElement.getAttribute('data-start-time');
+                                console.log(`🔄 Calculando return_time para countdown ${index + 1} baseado em:`, startTime);
+                                
+                                const calculatedReturnTime = calculateReturnTimeFromStart(startTime);
+                                if (calculatedReturnTime) {
+                                    remainingSeconds = Math.floor((calculatedReturnTime - new Date()) / 1000);
+                                    remainingSeconds = Math.max(0, remainingSeconds);
+                                    console.log(`⏰ Countdown ${index + 1} calculado:`, remainingSeconds, 'segundos');
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (remainingSeconds > 0) {
+                    const formattedTime = formatTimeDetailed(remainingSeconds);
+                    timer.textContent = formattedTime;
+                    console.log(`✅ Countdown ${index + 1} atualizado:`, formattedTime);
+                    
+                    // Mudar cor quando restam menos de 5 minutos
+                    if (remainingSeconds <= 300) { // 5 minutos
+                        timer.style.color = '#ff6b6b';
+                        timer.style.fontWeight = 'bold';
+                        timer.classList.add('warning');
+                    } else {
+                        timer.style.color = '';
+                        timer.style.fontWeight = '';
+                        timer.classList.remove('warning');
+                    }
+                } else {
+                    timer.textContent = '00:00';
+                    timer.style.color = '#28a745';
+                    timer.style.fontWeight = 'bold';
+                    timer.classList.remove('warning');
+                    console.log(`✅ Countdown ${index + 1} esgotado: 00:00`);
+                }
+            });
+            
+            console.log('✅ Atualização de cronômetros concluída');
+        }
+
+        // Função para forçar atualização imediata
+        function forceUpdateTimers() {
+            console.log('🚀 Forçando atualização imediata dos cronômetros...');
+            updateTimers();
+        }
+
+        // Função para testar diferentes formatos de tempo
+        function testTimeFormats() {
+            console.log('🧪 Testando diferentes formatos de tempo...');
+            
+            const testTimes = [
+                '23:01:20',
+                '2024-01-01 23:01:20',
+                '2024-01-01T23:01:20',
+                '17/10/2025 23:20:07', // Formato brasileiro
+                new Date().toISOString(),
+                new Date().toLocaleString()
+            ];
+            
+            testTimes.forEach((time, index) => {
+                console.log(`\n🧪 Teste ${index + 1}:`, time);
+                const result = calculateElapsedSeconds(time);
+                console.log(`✅ Resultado:`, result, 'segundos');
+            });
+            
+            // Teste com tempo atual - 1 hora
+            const oneHourAgo = new Date();
+            oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+            console.log(`\n🧪 Teste com 1 hora atrás:`, oneHourAgo.toLocaleString());
+            const result1h = calculateElapsedSeconds(oneHourAgo.toLocaleString());
+            console.log(`✅ Resultado esperado ~3600 segundos:`, result1h);
+            
+            // Teste específico com formato brasileiro
+            const now = new Date();
+            const brazilianFormat = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            console.log(`\n🧪 Teste formato brasileiro atual:`, brazilianFormat);
+            const resultBrazilian = calculateElapsedSeconds(brazilianFormat);
+            console.log(`✅ Resultado esperado ~0 segundos:`, resultBrazilian);
+            
+            // Teste de interjornada
+            console.log(`\n🧪 Teste de interjornada:`);
+            const blockTime = '17/10/2025 23:33:44';
+            const returnTime = calculateReturnTimeFromBlock(blockTime);
+            console.log(`✅ Tempo de liberação calculado:`, returnTime ? returnTime.toLocaleString() : 'null');
+            
+            if (returnTime) {
+                const remaining = calculateRemainingSeconds(returnTime.toISOString());
+                console.log(`✅ Tempo restante:`, remaining, 'segundos');
+            }
+        }
+
+        // Função para mostrar dados brutos da API
+        function showRawApiData() {
+            console.log('🔍 Buscando dados brutos da API...');
+            fetch('/api/sessoes-publicas/')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 Dados brutos da API:', data);
+                    if (data.sessions && data.sessions.length > 0) {
+                        console.log('📋 Primeira sessão detalhada:');
+                        const firstSession = data.sessions[0];
+                        Object.keys(firstSession).forEach(key => {
+                            console.log(`  ${key}:`, firstSession[key], 'tipo:', typeof firstSession[key]);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Erro ao buscar dados da API:', error);
+                });
+        }
+
+        // Função para debug específico da interjornada
+        function debugInterjornada() {
+            console.log('🔍 Debug específico da interjornada...');
+            
+            const blockedCards = document.querySelectorAll('.session-card.blocked');
+            console.log('📊 Encontradas', blockedCards.length, 'sessões bloqueadas');
+            
+            blockedCards.forEach((card, index) => {
+                console.log(`\n🔍 Sessão bloqueada ${index + 1}:`);
+                
+                // Mostrar todas as informações da sessão
+                const labels = card.querySelectorAll('.info-label');
+                const values = card.querySelectorAll('.info-value');
+                
+                labels.forEach((label, i) => {
+                    const value = values[i];
+                    console.log(`  ${label.textContent}:`, value ? value.textContent : 'N/A');
+                });
+                
+                // Procurar especificamente pelo tempo de bloqueio
+                const blockStartLabel = Array.from(labels).find(label => 
+                    label.textContent.includes('Bloqueado desde')
+                );
+                
+                if (blockStartLabel) {
+                    const blockStartElement = blockStartLabel.nextElementSibling;
+                    if (blockStartElement) {
+                        const blockTime = blockStartElement.textContent.trim();
+                        console.log(`  🕐 Tempo de bloqueio encontrado:`, blockTime);
+                        
+                        const returnTime = calculateReturnTimeFromBlock(blockTime);
+                        if (returnTime) {
+                            const remaining = calculateRemainingSeconds(returnTime.toISOString());
+                            console.log(`  ⏰ Tempo de liberação:`, returnTime.toLocaleString());
+                            console.log(`  ⏱️ Tempo restante:`, remaining, 'segundos');
+                        }
+                    }
+                }
+                
+                // Mostrar cronômetros
+                const countdownTimers = card.querySelectorAll('.timer-countdown');
+                countdownTimers.forEach((timer, i) => {
+                    console.log(`  ⏰ Cronômetro ${i + 1}:`, timer.textContent, 'data-return-time:', timer.getAttribute('data-return-time'));
+                });
+            });
+        }
+
+        // Função para limpar console e reduzir spam
+        function clearConsole() {
+            console.clear();
+            console.log('🧹 Console limpo!');
+            console.log('🔧 Use os botões de debug para testar funcionalidades');
+        }
+
+        // Função para testar o áudio
+        function testAudio() {
+            console.log('🧪 Testando áudio de acesso negado...');
+            playAccessDeniedSound();
+        }
+
+        // Disponibilizar função globalmente para teste
+        window.testAudio = testAudio;
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Página carregada, iniciando auto-refresh...');
+            console.log('⏰ Intervalo configurado:', refreshInterval, 'ms');
+            
             fetchSessions();
+            fetchLogs(); // Buscar logs iniciais
+            
+            // Marcar página como inicializada após 2 segundos (tempo para processar logs iniciais)
+            setTimeout(() => {
+                isPageInitialized = true;
+                console.log('✅ Página inicializada - modais de acesso negado agora serão exibidos em tempo real');
+                
+                // Testar áudio após inicialização
+                setTimeout(() => {
+                    console.log('🧪 Testando áudio após inicialização...');
+                    testAudio();
+                }, 1000);
+            }, 2000);
+            
             setInterval(fetchSessions, refreshInterval);
+            setInterval(fetchLogs, 1000); // Buscar logs a cada 1 segundo para detecção rápida
+            setInterval(updateTimers, 1000); // Atualizar cronômetros a cada 1 segundo
+            
+            // Refresh adicional a cada 1 minuto
+            setInterval(fetchSessions, 60000);
+            
+            // Event listener para fechar modal ao clicar fora dele
+            document.addEventListener('click', function(event) {
+                const modal = document.getElementById('accessDeniedModal');
+                if (modal && modal.classList.contains('show') && event.target === modal) {
+                    closeAccessDeniedModal();
+                }
+                
+                // Inicializar áudio na primeira interação do usuário
+                if (!userInteracted) {
+                    userInteracted = true;
+                    console.log('👆 Usuário interagiu - inicializando áudio...');
+                    initializeAudio();
+                }
+            });
+            
+            // Event listeners para detectar interação do usuário
+            document.addEventListener('keydown', function() {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    console.log('⌨️ Usuário pressionou tecla - inicializando áudio...');
+                    initializeAudio();
+                }
+            });
+            
+            document.addEventListener('touchstart', function() {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    console.log('👆 Usuário tocou na tela - inicializando áudio...');
+                    initializeAudio();
+                }
+            });
+            
+            
+            console.log('✅ Auto-refresh iniciado com sucesso!');
+            console.log('⏰ Refresh adicional a cada 1 minuto configurado!');
+            console.log('🚫 Detecção de acesso negado ativada!');
+            console.log('⏱️ Cronômetros em tempo real ativados!');
         });
     </script>
 </body>

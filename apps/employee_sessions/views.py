@@ -5,6 +5,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from datetime import timedelta
 
 from .models import EmployeeSession
@@ -108,6 +110,73 @@ def api_sessoes_publicas(request):
         })
 
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def api_session_counts(request):
+    """API para obter contadores de sessões ativas e bloqueadas."""
+    try:
+        # Contar sessões ativas (active + pending_rest)
+        active_count = EmployeeSession.objects.filter(
+            state__in=['active', 'pending_rest']
+        ).count()
+        
+        # Contar sessões bloqueadas (blocked)
+        blocked_count = EmployeeSession.objects.filter(
+            state='blocked'
+        ).count()
+        
+        return JsonResponse({
+            'success': True,
+            'active_count': active_count,
+            'blocked_count': blocked_count,
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def api_session_counts(request):
+    """API para obter contadores de sessões ativas e bloqueadas."""
+    try:
+        # Contar sessões ativas (active + pending_rest)
+        active_count = EmployeeSession.objects.filter(
+            state__in=['active', 'pending_rest']
+        ).count()
+        
+        # Contar sessões bloqueadas (blocked)
+        blocked_count = EmployeeSession.objects.filter(
+            state='blocked'
+        ).count()
+        
+        return JsonResponse({
+            'success': True,
+            'active_count': active_count,
+            'blocked_count': blocked_count,
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+
+
 @staff_member_required
 def api_sessoes_ativas(request):
     """API para sessões ativas (AJAX) - Requer autenticação admin."""
@@ -178,6 +247,73 @@ def api_sessoes_ativas(request):
             'success': True,
             'sessoes': sessoes_data,
             'total_sessoes': len(sessoes_data),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def api_session_counts(request):
+    """API para obter contadores de sessões ativas e bloqueadas."""
+    try:
+        # Contar sessões ativas (active + pending_rest)
+        active_count = EmployeeSession.objects.filter(
+            state__in=['active', 'pending_rest']
+        ).count()
+        
+        # Contar sessões bloqueadas (blocked)
+        blocked_count = EmployeeSession.objects.filter(
+            state='blocked'
+        ).count()
+        
+        return JsonResponse({
+            'success': True,
+            'active_count': active_count,
+            'blocked_count': blocked_count,
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        })
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def api_session_counts(request):
+    """API para obter contadores de sessões ativas e bloqueadas."""
+    try:
+        # Contar sessões ativas (active + pending_rest)
+        active_count = EmployeeSession.objects.filter(
+            state__in=['active', 'pending_rest']
+        ).count()
+        
+        # Contar sessões bloqueadas (blocked)
+        blocked_count = EmployeeSession.objects.filter(
+            state='blocked'
+        ).count()
+        
+        return JsonResponse({
+            'success': True,
+            'active_count': active_count,
+            'blocked_count': blocked_count,
             'timestamp': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
         })
         

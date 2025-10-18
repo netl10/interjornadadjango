@@ -94,9 +94,30 @@ class EmployeeSessionAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at', 'default_config_info']
     ordering = ['-created_at']
     
+    def get_queryset(self, request):
+        """Filtra apenas sessões não concluídas por padrão."""
+        qs = super().get_queryset(request)
+        
+        # Verificar se o usuário quer ver sessões concluídas
+        show_completed = request.GET.get('show_completed', 'false').lower() == 'true'
+        
+        if not show_completed:
+            # Mostrar apenas sessões ativas (não concluídas) por padrão
+            return qs.exclude(state='completed')
+        else:
+            # Mostrar todas as sessões incluindo concluídas
+            return qs
+    
+    def changelist_view(self, request, extra_context=None):
+        """Adiciona contexto para mostrar opção de visualizar concluídas."""
+        extra_context = extra_context or {}
+        extra_context['show_completed'] = request.GET.get('show_completed', 'false').lower() == 'true'
+        return super().changelist_view(request, extra_context)
+    
     fieldsets = (
         ('Informações Básicas', {
-            'fields': ('employee', 'state', 'first_access', 'last_access')
+            'fields': ('employee', 'state', 'first_access', 'last_access'),
+            'description': '⚠️ ATENÇÃO: Ao alterar o estado para "Concluído", a sessão será limpa automaticamente e, se o funcionário estiver em interjornada (blacklist), ele será removido da blacklist e retornado ao grupo original.'
         }),
         ('Configurações de Duração', {
             'fields': ('work_duration_minutes', 'rest_duration_minutes', 'default_config_info'),

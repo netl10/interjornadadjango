@@ -707,7 +707,7 @@
         if (!autoRefreshEnabled) return;
 
         try {
-            const response = await fetch('/admin/logs/api/realtime-logs/?limit=10');
+            const response = await fetch('/api/v1/logs/api/logs-publicos/?limit=10');
             const data = await response.json();
 
             if (data.success && data.logs) {

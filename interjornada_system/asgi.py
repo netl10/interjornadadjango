@@ -16,13 +16,17 @@ from channels.auth import AuthMiddlewareStack
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'interjornada_system.settings')
 
 # Importar as rotas do WebSocket
-from apps.dashboard.routing import websocket_urlpatterns
+from apps.dashboard.routing import websocket_urlpatterns as dashboard_websocket_urlpatterns
+from apps.logs.routing import websocket_urlpatterns as logs_websocket_urlpatterns
+
+# Combinar todas as rotas WebSocket
+all_websocket_urlpatterns = dashboard_websocket_urlpatterns + logs_websocket_urlpatterns
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            websocket_urlpatterns
+            all_websocket_urlpatterns
         )
     ),
 })

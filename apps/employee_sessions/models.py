@@ -1,9 +1,12 @@
 """
 Modelos para sessões de funcionários.
 """
+import logging
 from django.db import models
 from apps.employees.models import Employee
 from apps.core.utils import TimezoneUtils
+
+logger = logging.getLogger(__name__)
 
 
 class EmployeeSession(models.Model):
@@ -144,6 +147,100 @@ class EmployeeSession(models.Model):
         self.return_time = None
         self.save()
     
+    def save(self, *args, **kwargs):
+        """Override do save para detectar mudanças de estado."""
+        # Verificar se é uma atualização e se o estado mudou para 'completed'
+        if self.pk:
+            try:
+                old_instance = EmployeeSession.objects.get(pk=self.pk)
+                old_state = old_instance.state
+                new_state = self.state
+                
+                # Se o estado mudou para 'completed', executar limpeza
+                if old_state != 'completed' and new_state == 'completed':
+                    self._handle_completion()
+                    
+            except EmployeeSession.DoesNotExist:
+                pass  # Nova instância, não fazer nada
+        
+        super().save(*args, **kwargs)
+    
+    def _handle_completion(self):
+        """Lida com a conclusão da sessão."""
+        try:
+            from apps.employees.group_service import group_service
+            from apps.logs.models import SystemLog
+            from apps.core.utils import TimezoneUtils
+            
+            logger.info(f"Iniciando limpeza da sessão {self.id} do funcionário {self.employee.name}")
+            
+            # Se o funcionário está em interjornada (blacklist), remover da blacklist
+            if group_service.is_in_blacklist(self.employee):
+                logger.info(f"Funcionário {self.employee.name} está na blacklist - removendo...")
+                
+                if group_service.restore_from_blacklist(self.employee):
+                    logger.info(f"Funcionário {self.employee.name} removido da blacklist com sucesso")
+                    
+                    # Log do sistema
+                    SystemLog.objects.create(
+                        event_type='session_completed_blacklist_removed',
+                        user_id=self.employee.device_id,
+                        user_name=self.employee.name,
+                        event_description=f'Sessão concluída - Funcionário removido da blacklist',
+                        device_timestamp=TimezoneUtils.get_utc_now(),
+                        processing_status='success'
+                    )
+                else:
+                    logger.error(f"Falha ao remover {self.employee.name} da blacklist")
+                    
+                    # Log de erro
+                    SystemLog.objects.create(
+                        event_type='session_completed_blacklist_remove_failed',
+                        user_id=self.employee.device_id,
+                        user_name=self.employee.name,
+                        event_description=f'Sessão concluída - Falha ao remover da blacklist',
+                        device_timestamp=TimezoneUtils.get_utc_now(),
+                        processing_status='error'
+                    )
+            else:
+                logger.info(f"Funcionário {self.employee.name} não estava na blacklist")
+                
+                # Log do sistema
+                SystemLog.objects.create(
+                    event_type='session_completed',
+                    user_id=self.employee.device_id,
+                    user_name=self.employee.name,
+                    event_description=f'Sessão concluída - Termino forçado',
+                    device_timestamp=TimezoneUtils.get_utc_now(),
+                    processing_status='success'
+                )
+            
+            # Limpar campos relacionados à interjornada
+            self.block_start = None
+            self.return_time = None
+            self.last_access = TimezoneUtils.get_utc_now()
+            
+            logger.info(f"Limpeza da sessão {self.id} concluída")
+            
+        except Exception as e:
+            logger.error(f"Erro ao processar conclusão da sessão {self.id}: {e}")
+            
+            # Log de erro
+            try:
+                from apps.logs.models import SystemLog
+                from apps.core.utils import TimezoneUtils
+                
+                SystemLog.objects.create(
+                    event_type='session_completion_error',
+                    user_id=self.employee.device_id,
+                    user_name=self.employee.name,
+                    event_description=f'Erro ao processar conclusão da sessão: {str(e)}',
+                    device_timestamp=TimezoneUtils.get_utc_now(),
+                    processing_status='error'
+                )
+            except:
+                pass  # Se falhar o log, não quebrar o processo principal
+
     def start_rest_period(self):
         """Inicia período de interjornada."""
         now = TimezoneUtils.get_utc_now()
