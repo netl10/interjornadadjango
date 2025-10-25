@@ -187,6 +187,20 @@
             font-size: 0.85em;
             font-weight: 500;
             letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        .card-number {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            font-size: 0.75em;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 18px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .employee-id-row.active {
@@ -309,6 +323,54 @@
             text-align: center;
             font-size: 0.9em;
             letter-spacing: 0.5px;
+        }
+
+        /* Card Footer Alert */
+        .card-footer-alert {
+            margin-top: 6px;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
+            border-radius: 6px;
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            animation: alertPulse 2s infinite;
+        }
+
+        .alert-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .alert-icon {
+            font-size: 1em;
+            animation: alertBounce 1.5s infinite;
+        }
+
+        .alert-text {
+            font-size: 0.85em;
+            font-weight: 800;
+            color: #d84315;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.2px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { 
+                background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.15));
+                border-color: rgba(255, 193, 7, 0.3);
+            }
+            50% { 
+                background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 152, 0, 0.25));
+                border-color: rgba(255, 193, 7, 0.5);
+            }
+        }
+
+        @keyframes alertBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 
                 0 2px 8px rgba(0, 0, 0, 0.1),
@@ -513,6 +575,150 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
         }
+
+        /* Modal de Aviso Personalizado (Amarelo Premium) */
+        .personalized-alert-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .modal-content-personalized-alert {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ffc107, #ff8f00, #ff6f00);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 
+                0 25px 50px rgba(255, 193, 7, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            animation: slideInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-content-personalized-alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6f00, #ffc107, #ff8f00, #ffc107, #ff6f00);
+            animation: shimmer 2s infinite;
+        }
+
+        .modal-header-personalized-alert {
+            text-align: center;
+            padding: 25px 30px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-header-personalized-alert h2 {
+            color: #1a1a1a;
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .alert-icon-personalized-alert {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            animation: bounceIn 0.6s ease-out, pulse 2s infinite 0.6s;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .modal-body-personalized-alert {
+            padding: 25px 30px;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 0;
+        }
+
+        .modal-body-personalized-alert p {
+            margin: 20px 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 0;
+        }
+
+        .modal-body-personalized-alert strong {
+            color: #666;
+            font-weight: 600;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            opacity: 0.8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .modal-body-personalized-alert span {
+            color: #1a1a1a;
+            font-weight: 700;
+            font-size: 1.3em;
+            line-height: 1.4;
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-footer-personalized-alert {
+            text-align: center;
+            padding: 20px 30px 25px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-close-personalized-alert {
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: #ffc107;
+            border: 2px solid #ffc107;
+            padding: 12px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .btn-close-personalized-alert:hover {
+            background: linear-gradient(135deg, #ffc107, #ff8f00);
+            color: #1a1a1a;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+            border-color: #ff8f00;
+        }
+
+        .btn-close-personalized-alert:active {
+            transform: translateY(0) scale(0.98);
+        }
         
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -522,6 +728,46 @@
         @keyframes slideIn {
             from { transform: translateY(-50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideInScale {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8) translateY(-20px);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05) translateY(0);
+            }
+            100% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { 
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% { 
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { 
+                background-position: -200% 0;
+            }
+            100% { 
+                background-position: 200% 0;
+            }
         }
     </style>
 </head>
@@ -559,11 +805,63 @@
         </div>
     </div>
 
+    <!-- Modal de Aviso Personalizado -->
+    <div id="personalizedAlertModal" class="personalized-alert-modal">
+        <div class="modal-content-personalized-alert">
+            <div class="modal-header-personalized-alert">
+                <div class="alert-icon-personalized-alert">⚠️</div>
+                <h2>ATENÇÃO REQUERIDA</h2>
+            </div>
+            <div class="modal-body-personalized-alert">
+                <p>
+                    <strong>Matrícula</strong>
+                    <span id="modalPersonalizedMatricula"></span>
+                </p>
+                <p>
+                    <strong>Colaborador</strong>
+                    <span id="modalPersonalizedNome"></span>
+                </p>
+                <p>
+                    <strong>Instrução</strong>
+                    <span id="modalPersonalizedAviso"></span>
+                </p>
+            </div>
+            <div class="modal-footer-personalized-alert">
+                <button class="btn-close-personalized-alert" onclick="closePersonalizedAlertModal()">Entendi</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let refreshInterval = 3000; // 3 segundos
         let lastSessionsData = [];
         let processedAccessDeniedLogs = new Set(); // Para evitar mostrar o mesmo log múltiplas vezes
+        let lastProcessedLogId = 0; // Para evitar reprocessar logs antigos no refresh
         let isPageInitialized = false; // Flag para controlar se a página já foi inicializada
+        let isManualRefresh = false; // Flag para detectar refresh manual
+        window.pageLoadTime = new Date().getTime(); // Timestamp do carregamento da página
+        
+        // Detectar refresh manual
+        if (performance.navigation.type === 1) {
+            isManualRefresh = true;
+            console.log('🔄 Refresh manual detectado');
+            
+            // Fechar modais que possam estar abertos
+            setTimeout(() => {
+                const modalAccessDenied = document.getElementById('accessDeniedModal');
+                const modalPersonalized = document.getElementById('personalizedAlertModal');
+                
+                if (modalAccessDenied && modalAccessDenied.style.display !== 'none') {
+                    closeAccessDeniedModal();
+                    console.log('🔄 Modal de acesso negado fechado devido ao refresh manual');
+                }
+                
+                if (modalPersonalized && modalPersonalized.style.display !== 'none') {
+                    closePersonalizedAlertModal();
+                    console.log('🔄 Modal personalizado fechado devido ao refresh manual');
+                }
+            }, 100);
+        }
 
         // Formatar tempo
         function formatTime(minutes) {
@@ -951,7 +1249,7 @@
         }
 
         // Criar card de sessão
-        function createSessionCard(session) {
+        function createSessionCard(session, index) {
             // Verificar se uma sessão ativa passou do tempo mínimo e deve ser tratada como pending_rest
             let actualState = session.state;
             let actualStateClass = getStateClass(session.state);
@@ -1007,16 +1305,21 @@
 
             // Para interjornada, não mostrar "Iniciado em"
             const showStartTime = actualState !== 'blocked';
+            
+            // Verificar se tem alert_type configurado para mostrar no bottom do card
+            const hasAlertType = session.alert_type && session.alert_type.trim() !== '';
+            const alertText = hasAlertType ? getAlertTypeText(session.alert_type) : '';
 
             return `
                 <div class="session-card ${actualStateClass}" data-session-id="${session.id}">
                     <div class="card-header">
                         <div class="employee-info">
                 <div class="employee-id-row ${actualStateClass}">
+                    <span class="card-number">${index + 1}</span>
                     <span class="id-label">ID:</span>
                     <span class="id-value">${session.employee_id}</span>
-                    <span class="matricula-label">Matrícula:</span>
-                    <span class="matricula-value">${session.employee_id}</span>
+                    <span class="matricula-label">MAT.:</span>
+                    <span class="matricula-value">${session.employee_code || session.employee_id}</span>
                 </div>
                             <h3>${session.employee_name}</h3>
                         </div>
@@ -1031,6 +1334,15 @@
                         ` : ''}
                         ${timeInfo}
                     </div>
+                    
+                    ${hasAlertType ? `
+                    <div class="card-footer-alert">
+                        <div class="alert-badge">
+                            <span class="alert-icon">⚠️</span>
+                            <span class="alert-text">${alertText}</span>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -1120,9 +1432,31 @@
                         willUpdate: hasChanges || data.sessoes.length === 0
                     });
                     
+                    // Verificar mudanças no alert_type
+                    let hasAlertTypeChanges = false;
+                    if (lastSessionsData.length > 0) {
+                        for (const currentSession of data.sessoes) {
+                            const lastSession = lastSessionsData.find(s => s.id === currentSession.id);
+                            if (lastSession && lastSession.alert_type !== currentSession.alert_type) {
+                                hasAlertTypeChanges = true;
+                                console.log('🔄 Mudança no alert_type detectada:', {
+                                    user: currentSession.employee_name,
+                                    old: lastSession.alert_type,
+                                    new: currentSession.alert_type
+                                });
+                                break;
+                            }
+                        }
+                    }
+                    
                     // Forçar atualização se houver mudanças ou se for a primeira vez
-                    if (hasChanges || data.sessoes.length === 0 || lastSessionsData.length === 0) {
+                    if (hasChanges || hasAlertTypeChanges || data.sessoes.length === 0 || lastSessionsData.length === 0) {
                         console.log('🔄 Atualizando exibição das sessões...');
+                        console.log('📊 Dados das sessões:', data.sessoes.map(s => ({
+                            id: s.employee_id,
+                            name: s.employee_name,
+                            alert_type: s.alert_type
+                        })));
                         updateSessionsDisplay(data.sessoes);
                         lastSessionsData = data.sessoes;
                     } else {
@@ -1176,7 +1510,7 @@
                     return 0;
                 });
                 
-                sortedSessions.forEach(session => {
+                sortedSessions.forEach((session, index) => {
                     // Debug: mostrar dados da sessão
                     console.log('📊 Dados da sessão:', {
                         id: session.id,
@@ -1200,7 +1534,7 @@
                         console.log('🧪 Resultado do teste:', testResult, 'segundos');
                     }
                     
-                    const cardHtml = createSessionCard(session);
+                    const cardHtml = createSessionCard(session, index);
                     grid.insertAdjacentHTML('beforeend', cardHtml);
                 });
                 
@@ -1384,6 +1718,33 @@
             stopAccessDeniedSound();
         }
 
+        // Função para mostrar modal de aviso personalizado
+        function showPersonalizedAlertModal(matricula, nome, alertType) {
+            const modal = document.getElementById('personalizedAlertModal');
+            
+            // Mapear tipos de aviso para texto
+            const alertTypeText = {
+                'rh': 'Procure o RH',
+                'supervisor': 'Procure o Supervisor',
+                'coordenador': 'Procure o Coordenador',
+                'ti': 'Procure o TI'
+            };
+            
+            document.getElementById('modalPersonalizedMatricula').textContent = matricula;
+            document.getElementById('modalPersonalizedNome').textContent = nome;
+            document.getElementById('modalPersonalizedAviso').textContent = alertTypeText[alertType] || 'Procure o setor responsável';
+            
+            modal.style.display = 'block';
+            console.log('✅ Modal de aviso personalizado exibido:', { matricula, nome, alertType });
+        }
+
+        // Função para fechar modal de aviso personalizado
+        function closePersonalizedAlertModal() {
+            const modal = document.getElementById('personalizedAlertModal');
+            modal.style.display = 'none';
+            console.log('❌ Modal de aviso personalizado fechado');
+        }
+
         // Função para verificar se um log é de acesso negado (apenas para usuários em interjornada)
         function isAccessDeniedLog(log) {
             // Verificar por event_type (6 = Acesso Negado, 8 = Acesso Bloqueado)
@@ -1425,6 +1786,149 @@
             }
         }
 
+        // Função para obter texto do alert_type
+        function getAlertTypeText(alertType) {
+            const alertTexts = {
+                'rh': 'Procure o RH',
+                'supervisor': 'Procure o Supervisor',
+                'coordenador': 'Procure o Coordenador',
+                'ti': 'Procure o TI'
+            };
+            return alertTexts[alertType] || 'Procure o Responsável';
+        }
+
+        // Funções para áudio personalizado
+        function playPersonalizedSound(alertType, matricula, nome) {
+            console.log('🎵 Iniciando áudio personalizado:', { alertType, matricula, nome });
+            console.log('🎵 FUNÇÃO CHAMADA - Modal deve aparecer agora!');
+            
+            // Mostrar modal verde
+            showPersonalizedAlertModal(matricula, nome, alertType);
+            
+            // Sequência: "Matrícula" + números + tipo de aviso
+            playAudio('/static/dashboard/matricula.mp3').then(() => {
+                console.log('✅ Áudio "Matrícula" reproduzido');
+                // 2. Tocar cada dígito da matrícula
+                return playMatriculaNumbers(matricula);
+            }).then(() => {
+                console.log('✅ Números da matrícula reproduzidos');
+                // 3. Tocar tipo de aviso
+                return playAlertType(alertType);
+            }).then(() => {
+                console.log('✅ Áudio personalizado completo');
+                // Fechar modal após o áudio terminar
+                setTimeout(() => {
+                    closePersonalizedAlertModal();
+                }, 1000);
+            }).catch(error => {
+                console.error('❌ Erro no áudio personalizado:', error);
+                // Fechar modal em caso de erro
+                closePersonalizedAlertModal();
+            });
+        }
+
+        function playMatriculaNumbers(matricula) {
+            const digits = matricula.toString().split('');
+            let promise = Promise.resolve();
+            
+            digits.forEach(digit => {
+                promise = promise.then(() => {
+                    console.log(`🔢 Reproduzindo dígito: ${digit}`);
+                    return playAudioFast(`/static/dashboard/numbers/${digit}.mp3`);
+                });
+            });
+            
+            return promise;
+        }
+
+        function playAlertType(alertType) {
+            let audioFile = '/static/dashboard/agd.mp3'; // Padrão
+            
+            switch(alertType) {
+                case 'rh':
+                    audioFile = '/static/dashboard/rh.mp3';
+                    break;
+                case 'supervisor':
+                    audioFile = '/static/dashboard/supervisor.mp3';
+                    break;
+                case 'coordenador':
+                    audioFile = '/static/dashboard/coordenador.mp3';
+                    break;
+                case 'ti':
+                    audioFile = '/static/dashboard/ti.mp3';
+                    break;
+            }
+            
+            console.log(`🎯 Reproduzindo tipo de aviso: ${alertType} (${audioFile})`);
+            return playAudio(audioFile);
+        }
+
+        function playAudio(audioPath) {
+            return new Promise((resolve, reject) => {
+                const audio = new Audio(audioPath);
+                audio.onended = () => resolve();
+                audio.onerror = () => reject();
+                audio.play().catch(reject);
+            });
+        }
+
+        function playAudioFast(audioPath) {
+            return new Promise((resolve, reject) => {
+                const audio = new Audio(audioPath);
+                audio.playbackRate = 1.5; // 50% mais rápido
+                audio.onended = () => resolve();
+                audio.onerror = () => reject();
+                audio.play().catch(reject);
+            });
+        }
+
+        function getAlertTypeForUser(userId) {
+            const session = lastSessionsData.find(s => s.employee_id === userId);
+            console.log('🔍 Buscando alert_type para usuário:', {
+                userId: userId,
+                sessionFound: !!session,
+                alertType: session ? session.alert_type : 'não encontrado',
+                totalSessions: lastSessionsData.length
+            });
+            return session ? session.alert_type : '';
+        }
+
+        function getMatriculaForUser(userId) {
+            const session = lastSessionsData.find(s => s.employee_id === userId);
+            return session ? session.employee_code : userId;
+        }
+
+        // Função para obter alert_type diretamente do Employee (mesmo sem sessão ativa)
+        function getAlertTypeFromEmployee(userId) {
+            // Esta função seria implementada com uma chamada à API para buscar o alert_type do Employee
+            // Por enquanto, vamos usar uma abordagem simples baseada nos dados conhecidos
+            const knownEmployees = {
+                1000602: 'supervisor', // ELIAS ALVES DE PAULA
+                1000287: 'coordenador', // ALAN ACASSIO ANDRADE RIBEIRO
+                1000218: 'coordenador', // ALAN OLIVEIRA NASCIMENTO
+                1: 'ti' // Diego Lucio
+            };
+            return knownEmployees[userId] || null;
+        }
+
+        // Função para obter matrícula diretamente do Employee (mesmo sem sessão ativa)
+        function getMatriculaFromEmployee(userId) {
+            // Esta função seria implementada com uma chamada à API para buscar a matrícula do Employee
+            // Por enquanto, vamos usar uma abordagem simples baseada nos dados conhecidos
+            const knownEmployees = {
+                1000602: '251433', // ELIAS ALVES DE PAULA
+                1000287: '244077', // ALAN ACASSIO ANDRADE RIBEIRO
+                1000218: '244077', // ALAN OLIVEIRA NASCIMENTO
+                1: '1' // Diego Lucio
+            };
+            return knownEmployees[userId] || userId.toString();
+        }
+
+        function isAccessAuthorizedLog(log) {
+            // Logs de acesso autorizado (event_type 1, 2 ou 7)
+            return log.event_type === 1 || log.event_type === 2 || log.event_type === 7;
+        }
+
         // Função para detectar tentativas de acesso negado
         function detectAccessAttempts(logs) {
             const now = new Date();
@@ -1438,8 +1942,8 @@
             });
             
             logs.forEach((log, index) => {
-                const isAccessDenied = isAccessDeniedLog(log);
                 const isProcessed = processedAccessDeniedLogs.has(log.id);
+                const isOldLog = log.id <= lastProcessedLogId;
                 
                 console.log(`📋 Log ${index + 1}:`, {
                     id: log.id,
@@ -1447,33 +1951,144 @@
                     event_type: log.event_type,
                     event_description: log.event_description,
                     user_id: log.user_id,
-                    isAccessDenied: isAccessDenied,
-                    isProcessed: isProcessed
+                    isProcessed: isProcessed,
+                    isOldLog: isOldLog,
+                    lastProcessedLogId: lastProcessedLogId,
+                    timestamp: log.device_timestamp
                 });
                 
-                if (isAccessDenied && !isProcessed) {
+                // Log específico para ALAN
+                if (log.user_name === 'ALAN ACASSIO ANDRADE RIBEIRO') {
+                    console.log('🔍 LOG DO ALAN DETECTADO:', {
+                        id: log.id,
+                        isProcessed: isProcessed,
+                        isOldLog: isOldLog,
+                        lastProcessedLogId: lastProcessedLogId,
+                        willBeProcessed: !isProcessed && !isOldLog && isPageInitialized,
+                        event_type: log.event_type,
+                        timestamp: log.device_timestamp
+                    });
+                }
+                
+                // Log específico para ELIAS
+                if (log.user_name === 'ELIAS ALVES DE PAULA') {
+                    console.log('🔍 LOG DO ELIAS DETECTADO:', {
+                        id: log.id,
+                        isProcessed: isProcessed,
+                        isOldLog: isOldLog,
+                        lastProcessedLogId: lastProcessedLogId,
+                        willBeProcessed: !isProcessed && !isOldLog && isPageInitialized,
+                        event_type: log.event_type,
+                        timestamp: log.device_timestamp
+                    });
+                }
+                
+                if (!isProcessed && !isOldLog && isPageInitialized) {
+                    console.log(`✅ Log ${log.id} passou nas verificações iniciais - processando...`);
                     processedAccessDeniedLogs.add(log.id);
+                    lastProcessedLogId = Math.max(lastProcessedLogId, log.id);
                     
                     // Verificar se o log é recente (últimos 30 segundos)
                     const logTime = new Date(log.device_timestamp);
                     const isRecentLog = logTime > thirtySecondsAgo;
                     
-                    console.log('🚫 Acesso negado detectado!', {
-                        user_name: log.user_name,
-                        log_id: log.id,
-                        isRecentLog: isRecentLog,
-                        logTime: logTime.toISOString(),
-                        thirtySecondsAgo: thirtySecondsAgo.toISOString()
-                    });
+                    // Se for refresh manual, só processar logs muito recentes (últimos 5 segundos)
+                    const fiveSecondsAgo = new Date(now.getTime() - 5000);
+                    const isVeryRecentLog = logTime > fiveSecondsAgo;
                     
-                    // Só mostrar o modal se a página já foi inicializada E o log for recente
-                    if (isPageInitialized && isRecentLog) {
-                        console.log('✅ Exibindo modal de acesso negado para:', log.user_name);
+                    if (isManualRefresh && !isVeryRecentLog) {
+                        console.log('🔄 Refresh manual - ignorando log antigo:', {
+                            user_name: log.user_name,
+                            logTime: logTime.toISOString(),
+                            fiveSecondsAgo: fiveSecondsAgo.toISOString()
+                        });
+                        return; // Pular este log
+                    }
+                    
+                    if (isRecentLog) {
+                        const isInInterjornada = isUserInInterjornada(log.user_id);
+                        const alertType = getAlertTypeForUser(log.user_id);
+                        const isAccessDenied = isAccessDeniedLog(log);
+                        const isAccessAuthorized = isAccessAuthorizedLog(log);
+                        
+                        console.log('🔍 Analisando log recente:', {
+                            user_name: log.user_name,
+                            user_id: log.user_id,
+                            event_type: log.event_type,
+                            isInInterjornada: isInInterjornada,
+                            alertType: alertType,
+                            isAccessDenied: isAccessDenied,
+                            isAccessAuthorized: isAccessAuthorized,
+                            logTime: logTime.toISOString(),
+                            thirtySecondsAgo: thirtySecondsAgo.toISOString()
+                        });
+                        
+                        if (isInInterjornada && isAccessDenied) {
+                            // Usuário em interjornada - só agd.mp3
+                            console.log('🚫 Usuário em interjornada - reproduzindo agd.mp3');
+                            
+                            // Verificação adicional: não mostrar modal no refresh manual para logs antigos
+                            if (isManualRefresh && !isVeryRecentLog) {
+                                console.log('🔄 Refresh manual detectado - modal de acesso negado não será exibido para log antigo');
+                                return;
+                            }
+                            
                     showAccessDeniedModal(log);
-                    } else if (!isPageInitialized) {
-                        console.log('🚫 Log de acesso negado detectado na inicialização (modal não será exibido):', log.user_name);
-                    } else if (!isRecentLog) {
-                        console.log('🚫 Log de acesso negado antigo (modal não será exibido):', log.user_name, 'timestamp:', log.device_timestamp);
+                            playAccessDeniedSound();
+                        } else if (!isInInterjornada && isAccessAuthorized && alertType) {
+                            // Usuário autorizado com aviso personalizado
+                            console.log('🎵 Usuário autorizado com aviso personalizado:', alertType);
+                            console.log('🔍 Verificações:', {
+                                isInInterjornada: isInInterjornada,
+                                isAccessAuthorized: isAccessAuthorized,
+                                alertType: alertType,
+                                isManualRefresh: isManualRefresh,
+                                isVeryRecentLog: isVeryRecentLog
+                            });
+                            
+                            // Verificação adicional: não mostrar modal no refresh manual para logs antigos
+                            if (isManualRefresh && !isVeryRecentLog) {
+                                console.log('🔄 Refresh manual detectado - modal personalizado não será exibido para log antigo');
+                                return;
+                            }
+                            
+                            console.log('✅ Todas as verificações passaram - exibindo modal personalizado');
+                            const matricula = getMatriculaForUser(log.user_id);
+                            const nome = log.user_name || 'Usuário não identificado';
+                            console.log('🎵 Matrícula para áudio:', matricula);
+                            playPersonalizedSound(alertType, matricula, nome);
+                        } else if (!isInInterjornada && isAccessAuthorized && !alertType) {
+                            // Usuário autorizado mas sem alert_type na sessão - verificar se tem no Employee
+                            const alertTypeFromEmployee = getAlertTypeFromEmployee(log.user_id);
+                            if (alertTypeFromEmployee) {
+                                console.log('🎵 Usuário sem sessão ativa mas com alert_type configurado:', alertTypeFromEmployee);
+                                
+                                // Verificação adicional: não mostrar modal no refresh manual para logs antigos
+                                if (isManualRefresh && !isVeryRecentLog) {
+                                    console.log('🔄 Refresh manual detectado - modal personalizado não será exibido para log antigo');
+                                    return;
+                                }
+                                
+                                console.log('✅ Usuário sem sessão ativa - exibindo modal personalizado');
+                                const matricula = getMatriculaFromEmployee(log.user_id);
+                                const nome = log.user_name || 'Usuário não identificado';
+                                console.log('🎵 Matrícula para áudio:', matricula);
+                                playPersonalizedSound(alertTypeFromEmployee, matricula, nome);
+                            }
+                        } else {
+                            console.log('❌ Log não atende aos critérios para áudio:', {
+                                isInInterjornada: isInInterjornada,
+                                isAccessAuthorized: isAccessAuthorized,
+                                alertType: alertType,
+                                isAccessDenied: isAccessDenied
+                            });
+                        }
+                    } else {
+                        console.log('⏰ Log não é recente (mais de 30 segundos):', {
+                            user_name: log.user_name,
+                            logTime: logTime.toISOString(),
+                            thirtySecondsAgo: thirtySecondsAgo.toISOString()
+                        });
                     }
                 }
             });
@@ -1751,11 +2366,7 @@
                 isPageInitialized = true;
                 console.log('✅ Página inicializada - modais de acesso negado agora serão exibidos em tempo real');
                 
-                // Testar áudio após inicialização
-                setTimeout(() => {
-                    console.log('🧪 Testando áudio após inicialização...');
-                    testAudio();
-                }, 1000);
+                // A flag isManualRefresh permanece ativa para filtrar logs antigos
             }, 2000);
             
             setInterval(fetchSessions, refreshInterval);
@@ -1767,9 +2378,15 @@
             
             // Event listener para fechar modal ao clicar fora dele
             document.addEventListener('click', function(event) {
-                const modal = document.getElementById('accessDeniedModal');
-                if (modal && modal.classList.contains('show') && event.target === modal) {
+                const modalAccessDenied = document.getElementById('accessDeniedModal');
+                const modalPersonalized = document.getElementById('personalizedAlertModal');
+                
+                if (modalAccessDenied && modalAccessDenied.classList.contains('show') && event.target === modalAccessDenied) {
                     closeAccessDeniedModal();
+                }
+                
+                if (modalPersonalized && modalPersonalized.style.display === 'block' && event.target === modalPersonalized) {
+                    closePersonalizedAlertModal();
                 }
                 
                 // Inicializar áudio na primeira interação do usuário

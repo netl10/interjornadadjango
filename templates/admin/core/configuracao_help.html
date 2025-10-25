@@ -1,0 +1,371 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Ajuda - Configurações do Sistema{% endblock %}
+
+{% block extrahead %}
+<style>
+    .help-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .help-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .help-header h1 {
+        margin: 0;
+        font-size: 2.5em;
+        font-weight: 700;
+    }
+    
+    .help-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+    }
+    
+    .help-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border-left: 5px solid #667eea;
+    }
+    
+    .help-section h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+        font-size: 1.4em;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+    
+    .help-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    .help-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .help-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .help-card h4 {
+        margin: 0 0 15px 0;
+        color: #007bff;
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+    
+    .help-card p {
+        margin: 0 0 15px 0;
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .help-card ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #666;
+    }
+    
+    .help-card li {
+        margin-bottom: 8px;
+    }
+    
+    .quick-actions {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .quick-actions h3 {
+        margin: 0 0 20px 0;
+        font-size: 1.5em;
+        font-weight: 600;
+    }
+    
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .quick-action-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 15px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: block;
+        text-align: center;
+    }
+    
+    .quick-action-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .troubleshooting {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .troubleshooting h4 {
+        margin: 0 0 15px 0;
+        color: #856404;
+        font-size: 1.2em;
+    }
+    
+    .troubleshooting ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #856404;
+    }
+    
+    .code-block {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #333;
+        margin: 10px 0;
+        overflow-x: auto;
+    }
+    
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <a href="{% url 'admin:index' %}">Início</a> &rsaquo;
+    <a href="{% url 'admin:core_systemconfiguration_changelist' %}">Configurações do Sistema</a> &rsaquo;
+    Ajuda
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="help-container">
+    <div class="help-header">
+        <h1>❓ Ajuda - Configurações do Sistema</h1>
+        <p>Guia completo para configurar e gerenciar o sistema de interjornada</p>
+    </div>
+    
+    <div class="quick-actions">
+        <h3>🚀 Ações Rápidas</h3>
+        <div class="quick-actions-grid">
+            <a href="{% url 'core:configuracao_sistema' %}" class="quick-action-btn">
+                ⚙️ Configurações
+            </a>
+            <a href="{% url 'core:sincronizar_blacklist' %}" class="quick-action-btn">
+                🔄 Sincronizar Blacklist
+            </a>
+            <a href="{% url 'admin:core_systemconfiguration_changelist' %}" class="quick-action-btn">
+                📋 Ver Todas as Configurações
+            </a>
+        </div>
+    </div>
+    
+    <div class="help-section">
+        <h3>🌐 Configurações de Conexão</h3>
+        <div class="help-grid">
+            <div class="help-card">
+                <h4>📱 Dispositivo Principal</h4>
+                <p>Configure a conexão com o dispositivo principal (catraca):</p>
+                <ul>
+                    <li><strong>IP:</strong> Endereço IP do dispositivo</li>
+                    <li><strong>Porta:</strong> 80 para HTTP, 443 para HTTPS</li>
+                    <li><strong>Usuário:</strong> Credenciais de acesso</li>
+                    <li><strong>Senha:</strong> Senha de acesso</li>
+                </ul>
+            </div>
+            <div class="help-card">
+                <h4>📱 Dispositivo Secundário</h4>
+                <p>Configure um dispositivo secundário (opcional):</p>
+                <ul>
+                    <li>Deixe vazio para desabilitar</li>
+                    <li>Use para redundância</li>
+                    <li>Mesmo formato do principal</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-section">
+        <h3>⏰ Configurações de Tempo</h3>
+        <div class="help-grid">
+            <div class="help-card">
+                <h4>🌍 Timezone</h4>
+                <p>Configure o fuso horário local:</p>
+                <ul>
+                    <li><strong>UTC-3:</strong> Brasil (padrão)</li>
+                    <li><strong>UTC-5:</strong> Estados Unidos</li>
+                    <li><strong>UTC+0:</strong> Londres</li>
+                </ul>
+            </div>
+            <div class="help-card">
+                <h4>⏱️ Timeouts</h4>
+                <p>Configure os tempos de espera:</p>
+                <ul>
+                    <li><strong>Validação de Giro:</strong> Tempo para validar giro</li>
+                    <li><strong>Monitoramento:</strong> Intervalo entre verificações</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-section">
+        <h3>🚪 Configurações de Interjornada</h3>
+        <div class="help-grid">
+            <div class="help-card">
+                <h4>⏰ Tempos</h4>
+                <p>Configure os tempos de interjornada:</p>
+                <ul>
+                    <li><strong>Liberado:</strong> Tempo de acesso livre</li>
+                    <li><strong>Bloqueado:</strong> Tempo de interjornada</li>
+                    <li><strong>Grupo de Exceção:</strong> Usuários isentos</li>
+                </ul>
+            </div>
+            <div class="help-card">
+                <h4>👥 Grupos</h4>
+                <p>Gerencie grupos de usuários:</p>
+                <ul>
+                    <li><strong>Grupo de Exceção:</strong> Usuários isentos</li>
+                    <li><strong>Grupo Blacklist:</strong> Usuários bloqueados</li>
+                    <li><strong>Sincronização:</strong> Mantenha IDs atualizados</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-section">
+        <h3>🔄 Sincronização de Blacklist</h3>
+        <div class="help-grid">
+            <div class="help-card">
+                <h4>🔄 Sincronização Automática</h4>
+                <p>Mantenha o ID do grupo blacklist sincronizado:</p>
+                <ul>
+                    <li>Busca automática no dispositivo</li>
+                    <li>Atualização do ID no sistema</li>
+                    <li>Logs de todas as operações</li>
+                </ul>
+            </div>
+            <div class="help-card">
+                <h4>🛠️ Como Usar</h4>
+                <p>Passos para sincronizar:</p>
+                <ul>
+                    <li>1. Acesse a página de sincronização</li>
+                    <li>2. Selecione o grupo correto</li>
+                    <li>3. Confirme a sincronização</li>
+                    <li>4. Verifique os logs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-section">
+        <h3>🔒 Configurações de Segurança</h3>
+        <div class="help-grid">
+            <div class="help-card">
+                <h4>🔐 SSL</h4>
+                <p>Configure a verificação SSL:</p>
+                <ul>
+                    <li><strong>Habilitado:</strong> Produção (recomendado)</li>
+                    <li><strong>Desabilitado:</strong> Desenvolvimento</li>
+                </ul>
+            </div>
+            <div class="help-card">
+                <h4>📊 Logs</h4>
+                <p>Configure o limite de logs:</p>
+                <ul>
+                    <li><strong>Máximo por Requisição:</strong> Evita sobrecarga</li>
+                    <li><strong>Recomendado:</strong> 100-1000 logs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="troubleshooting">
+        <h4>🔧 Solução de Problemas</h4>
+        <ul>
+            <li><strong>Conexão falha:</strong> Verifique IP, porta e credenciais</li>
+            <li><strong>Timeout:</strong> Aumente o tempo de timeout</li>
+            <li><strong>SSL:</strong> Desabilite para desenvolvimento</li>
+            <li><strong>Blacklist:</strong> Use a sincronização automática</li>
+            <li><strong>Logs:</strong> Verifique os logs do sistema</li>
+        </ul>
+    </div>
+    
+    <div class="help-section">
+        <h3>📞 Suporte</h3>
+        <div class="help-grid">
+            <div class="help-card">
+                <h4>📋 Logs do Sistema</h4>
+                <p>Verifique os logs para diagnosticar problemas:</p>
+                <div class="code-block">
+                    # Acesse o admin do Django
+                    http://localhost:8000/admin/logs/systemlog/
+                </div>
+            </div>
+            <div class="help-card">
+                <h4>🔄 Sincronização</h4>
+                <p>Use a ferramenta de sincronização:</p>
+                <div class="code-block">
+                    # Página de sincronização
+                    http://localhost:8000/admin/core/sincronizar-blacklist/
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

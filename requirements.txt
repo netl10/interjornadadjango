@@ -1,13 +1,135 @@
+# Django Core
 Django>=4.2.0
 djangorestframework>=3.14.0
 django-cors-headers>=4.3.0
+
+# WebSocket Support
 channels>=4.0.0
 channels-redis>=4.1.0
+
+# HTTP Requests
 requests>=2.31.0
+urllib3>=2.0.0
+
+# Configuration
 python-decouple>=3.8
+
+# Timezone Support
 pytz>=2023.3
+
+# Task Queue
 celery>=5.3.0
 redis>=5.0.0
+
+# Database
 psycopg2-binary>=2.9.0
+
+# Image Processing
 Pillow>=10.0.0
+
+# Development Tools
 django-extensions>=3.2.0
+
+# Authentication & Security
+django-allauth>=0.57.0
+cryptography>=41.0.0
+
+# Logging & Monitoring
+django-logging>=1.0.0
+
+# API Documentation
+drf-yasg>=1.21.0
+
+# Testing
+pytest>=7.4.0
+pytest-django>=4.5.0
+factory-boy>=3.3.0
+
+# Code Quality
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Date/Time Utilities
+python-dateutil>=2.8.0
+
+# JSON Handling
+simplejson>=3.19.0
+
+# HTTP Client
+httpx>=0.24.0
+
+# Data Validation
+marshmallow>=3.20.0
+
+# Caching
+django-redis>=5.4.0
+
+# File Handling
+openpyxl>=3.1.0
+
+# Email
+django-anymail>=10.0.0
+
+# Background Tasks
+django-rq>=2.8.0
+
+# API Rate Limiting
+django-ratelimit>=4.1.0
+
+# Health Checks
+django-health-check>=3.17.0
+
+# Static Files
+whitenoise>=6.5.0
+
+# Database Migrations
+django-migration-linter>=2.0.0
+
+# Admin Interface
+django-admin-interface>=0.25.0
+django-colorfield>=0.9.0
+
+# Form Handling
+django-crispy-forms>=2.0.0
+crispy-bootstrap5>=0.7.0
+
+# Internationalization
+django-modeltranslation>=0.18.0
+
+# Search
+django-haystack>=3.2.0
+whoosh>=2.7.4
+
+# File Upload
+django-storages>=1.14.0
+boto3>=1.28.0
+
+# Monitoring
+django-debug-toolbar>=4.2.0
+django-silk>=5.0.0
+
+# Performance
+django-cachalot>=2.6.0
+
+# Security
+django-security>=0.19.0
+django-axes>=6.1.0
+
+# Content Management
+django-ckeditor>=6.7.0
+
+# Notifications
+django-notifications-hq>=1.8.0
+
+# Analytics
+django-analytics>=0.1.0
+
+# Backup
+django-dbbackup>=3.3.0
+
+# Maintenance
+django-maintenance-mode>=0.16.0

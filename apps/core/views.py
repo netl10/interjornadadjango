@@ -182,3 +182,120 @@ def test_device_connection(request):
 def configuracao_help(request):
     """Página de ajuda para configurações."""
     return render(request, 'admin/core/configuracao_help.html')
+
+
+@staff_member_required
+def core_admin(request):
+    """Página principal do admin do core com ferramentas."""
+    return render(request, 'admin/core/custom_admin.html')
+
+
+@staff_member_required
+def sincronizar_blacklist(request):
+    """Página para sincronizar ID do grupo blacklist."""
+    from apps.employees.models import EmployeeGroup
+    from apps.devices.device_client import DeviceClient
+    
+    context = {
+        'blacklist_group': None,
+        'device_groups': [],
+        'sync_result': None,
+        'error': None
+    }
+    
+    try:
+        # Obter grupo blacklist atual
+        blacklist_group = EmployeeGroup.objects.filter(is_blacklist=True).first()
+        context['blacklist_group'] = blacklist_group
+        
+        # Conectar ao dispositivo e buscar grupos
+        client = DeviceClient()
+        if client.login():
+            groups = client.get_groups()
+            context['device_groups'] = groups
+            
+            # Filtrar grupos com "blacklist" no nome
+            blacklist_groups = [g for g in groups if 'blacklist' in g.get('name', '').lower()]
+            context['blacklist_groups_device'] = blacklist_groups
+            
+    except Exception as e:
+        context['error'] = str(e)
+    
+    return render(request, 'admin/core/sincronizar_blacklist.html', context)
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def processar_sincronizacao_blacklist(request):
+    """Processa a sincronização do ID do grupo blacklist."""
+    from apps.employees.models import EmployeeGroup
+    from apps.devices.device_client import DeviceClient
+    
+    try:
+        data = json.loads(request.body)
+        new_group_id = data.get('group_id')
+        
+        if not new_group_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'ID do grupo não fornecido'
+            })
+        
+        # Obter grupo blacklist
+        blacklist_group = EmployeeGroup.objects.filter(is_blacklist=True).first()
+        
+        if not blacklist_group:
+            return JsonResponse({
+                'success': False,
+                'message': 'Grupo blacklist não encontrado no sistema'
+            })
+        
+        # Verificar se o grupo existe no dispositivo
+        client = DeviceClient()
+        if not client.login():
+            return JsonResponse({
+                'success': False,
+                'message': 'Falha ao conectar ao dispositivo'
+            })
+        
+        groups = client.get_groups()
+        target_group = None
+        
+        for group in groups:
+            if group.get('id') == new_group_id:
+                target_group = group
+                break
+        
+        if not target_group:
+            return JsonResponse({
+                'success': False,
+                'message': f'Grupo com ID {new_group_id} não encontrado no dispositivo'
+            })
+        
+        # Atualizar ID no banco
+        old_id = blacklist_group.device_group_id
+        blacklist_group.device_group_id = new_group_id
+        blacklist_group.save()
+        
+        # Log da operação
+        from apps.logs.models import SystemLog
+        SystemLog.objects.create(
+            level='INFO',
+            category='system',
+            message=f'ID do grupo blacklist atualizado de {old_id} para {new_group_id}',
+            details={'grupo': blacklist_group.name, 'dispositivo': target_group.get("name", "N/A")}
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'ID do grupo blacklist atualizado com sucesso! De {old_id} para {new_group_id}',
+            'old_id': old_id,
+            'new_id': new_group_id,
+            'group_name': target_group.get('name', 'N/A')
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Erro ao processar sincronização: {str(e)}'
+        })

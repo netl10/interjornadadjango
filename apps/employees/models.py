@@ -33,6 +33,23 @@ class Employee(models.Model):
     work_duration_minutes = models.IntegerField(null=True, blank=True, verbose_name="Duração de Trabalho (min)")
     rest_duration_minutes = models.IntegerField(null=True, blank=True, verbose_name="Duração de Interjornada (min)")
     
+    # Tipo de aviso para acesso
+    ALERT_TYPE_CHOICES = [
+        ('', 'Padrão'),
+        ('rh', 'RH'),
+        ('supervisor', 'Supervisor'),
+        ('coordenador', 'Coordenador'),
+        ('ti', 'TI'),
+    ]
+    
+    alert_type = models.CharField(
+        max_length=20, 
+        choices=ALERT_TYPE_CHOICES, 
+        default='', 
+        blank=True,
+        verbose_name="Tipo de Aviso"
+    )
+    
     # Metadados
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")

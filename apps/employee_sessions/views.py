@@ -4,6 +4,7 @@ Views para sessões de funcionários.
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -25,13 +26,15 @@ def dashboard_sessoes_clean(request):
     return render(request, 'admin/sessions/dashboard_sessoes_clean.html')
 
 
+@login_required
 def sessoes_interjornada(request):
     """Página standalone para mostrar apenas sessões de interjornada."""
     return render(request, 'sessions/interjornada.html')
 
 
+@login_required
 def api_sessoes_publicas(request):
-    """API pública para sessões ativas (sem autenticação)."""
+    """API para sessões ativas (com autenticação)."""
     try:
         # Buscar todas as sessões ativas
         sessoes = EmployeeSession.objects.filter(
@@ -78,6 +81,8 @@ def api_sessoes_publicas(request):
                 'id': sessao.id,
                 'employee_id': sessao.employee.device_id,
                 'employee_name': sessao.employee.name,
+                'employee_code': sessao.employee.employee_code or str(sessao.employee.device_id),
+                'alert_type': sessao.employee.alert_type,
                 'state': sessao.state,
                 'state_display': sessao.get_state_display(),
                 'first_access': sessao.display_first_access,
@@ -112,6 +117,7 @@ def api_sessoes_publicas(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@login_required
 def api_session_counts(request):
     """API para obter contadores de sessões ativas e bloqueadas."""
     try:
@@ -149,6 +155,7 @@ def api_session_counts(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@login_required
 def api_session_counts(request):
     """API para obter contadores de sessões ativas e bloqueadas."""
     try:
@@ -178,6 +185,7 @@ def api_session_counts(request):
 
 
 @staff_member_required
+@login_required
 def api_sessoes_ativas(request):
     """API para sessões ativas (AJAX) - Requer autenticação admin."""
     try:
@@ -226,6 +234,8 @@ def api_sessoes_ativas(request):
                 'id': sessao.id,
                 'employee_id': sessao.employee.device_id,
                 'employee_name': sessao.employee.name,
+                'employee_code': sessao.employee.employee_code or str(sessao.employee.device_id),
+                'alert_type': sessao.employee.alert_type,
                 'state': sessao.state,
                 'state_display': sessao.get_state_display(),
                 'first_access': sessao.display_first_access,
@@ -260,6 +270,7 @@ def api_sessoes_ativas(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@login_required
 def api_session_counts(request):
     """API para obter contadores de sessões ativas e bloqueadas."""
     try:
@@ -297,6 +308,7 @@ def api_session_counts(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@login_required
 def api_session_counts(request):
     """API para obter contadores de sessões ativas e bloqueadas."""
     try:

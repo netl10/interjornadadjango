@@ -19,6 +19,10 @@ class EmployeeAdmin(admin.ModelAdmin):
         ('Configurações de Interjornada', {
             'fields': ('is_exempt', 'work_duration_minutes', 'rest_duration_minutes')
         }),
+        ('Configurações de Aviso', {
+            'fields': ('alert_type',),
+            'description': 'Tipo de aviso que será reproduzido quando o funcionário fizer acesso (apenas quando não estiver em interjornada)'
+        }),
         ('Grupos', {
             'fields': ('groups', 'exemption_groups'),
             'classes': ('collapse',)

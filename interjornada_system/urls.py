@@ -20,6 +20,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # URLs de autenticação (devem vir primeiro)
+    path('login/', include('apps.authentication.urls')),
+    
     # URLs específicas do admin devem vir ANTES da URL genérica do admin
     path('admin/logs/', include('apps.logs.urls')),  # URLs do admin para logs
     path('admin/sessions/', include('apps.employee_sessions.urls')),  # URLs do admin para sessões

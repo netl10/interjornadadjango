@@ -5,6 +5,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.contrib.admin import AdminSite
+from django.http import HttpResponseRedirect
 from .models import SystemConfiguration
 
 
@@ -193,4 +195,42 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
         active_config = SystemConfiguration.objects.filter(is_active=True).first()
         if active_config:
             extra_context['active_config'] = active_config
+        
         return super().changelist_view(request, extra_context=extra_context)
+
+
+# Criar um modelo fictício para o Config. Blacklist
+from django.db import models
+
+class BlacklistConfig(models.Model):
+    """Modelo fictício para Config. Blacklist."""
+    name = models.CharField(max_length=100, default="Config. Blacklist")
+    
+    class Meta:
+        verbose_name = "Config. Blacklist"
+        verbose_name_plural = "Config. Blacklist"
+        managed = False  # Não criar tabela no banco
+    
+    def __str__(self):
+        return self.name
+
+
+@admin.register(BlacklistConfig)
+class BlacklistConfigAdmin(admin.ModelAdmin):
+    """Admin personalizado para Config. Blacklist."""
+    
+    def changelist_view(self, request, extra_context=None):
+        """Redireciona para a página de sincronização do blacklist."""
+        return HttpResponseRedirect(reverse('core:sincronizar_blacklist'))
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+    def has_view_permission(self, request, obj=None):
+        return True

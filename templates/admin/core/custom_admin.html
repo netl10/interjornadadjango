@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .core-menu-item {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 10px 0;
+        text-decoration: none;
+        display: block;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .core-menu-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .core-menu-item h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+    
+    .core-menu-item p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.9em;
+    }
+    
+    .core-menu-container {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+    }
+    
+    .core-menu-container h2 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 1.4em;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="core-menu-container">
+    <h2>🔧 Ferramentas do Core</h2>
+    <a href="{% url 'core:sincronizar_blacklist' %}" class="core-menu-item">
+        <h3>⚙️ Config. Blacklist</h3>
+        <p>Configure e sincronize o grupo blacklist entre o sistema e o dispositivo</p>
+    </a>
+</div>
+
+{{ block.super }}
+{% endblock %}

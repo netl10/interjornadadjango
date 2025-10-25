@@ -1,0 +1,443 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Sincronizar Grupo Blacklist{% endblock %}
+
+{% block extrahead %}
+<style>
+    .sync-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .sync-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .sync-header h1 {
+        margin: 0;
+        font-size: 2.5em;
+        font-weight: 700;
+    }
+    
+    .sync-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+    }
+    
+    .info-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border-left: 5px solid #667eea;
+    }
+    
+    .info-card h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .info-value {
+        font-weight: 700;
+        color: #333;
+    }
+    
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+    
+    .status-success {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-warning {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .groups-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .groups-section h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+        font-size: 1.4em;
+        font-weight: 600;
+    }
+    
+    .group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin: 10px 0;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .group-item:hover {
+        border-color: #667eea;
+        background: #f0f2ff;
+        transform: translateY(-2px);
+    }
+    
+    .group-item.selected {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+    
+    .group-info {
+        flex: 1;
+    }
+    
+    .group-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .group-id {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .group-users {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .sync-button {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .sync-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .sync-button:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-weight: 600;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .no-groups {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    
+    .no-groups i {
+        font-size: 3em;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sync-container">
+    <div class="sync-header">
+        <h1>🔄 Sincronizar Grupo Blacklist</h1>
+        <p>Busque e sincronize o ID do grupo blacklist entre o sistema e o dispositivo</p>
+    </div>
+    
+    {% if error %}
+        <div class="alert alert-danger">
+            <strong>❌ Erro:</strong> {{ error }}
+        </div>
+    {% endif %}
+    
+    <div class="info-cards">
+        <div class="info-card">
+            <h3>📊 Sistema Django</h3>
+            {% if blacklist_group %}
+                <div class="info-item">
+                    <span class="info-label">Nome:</span>
+                    <span class="info-value">{{ blacklist_group.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">ID no Dispositivo:</span>
+                    <span class="info-value">{{ blacklist_group.device_group_id|default:"Não definido" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span class="status-badge {% if blacklist_group.is_active %}status-success{% else %}status-danger{% endif %}">
+                        {% if blacklist_group.is_active %}✅ Ativo{% else %}❌ Inativo{% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Criado em:</span>
+                    <span class="info-value">{{ blacklist_group.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+            {% else %}
+                <div class="no-groups">
+                    <i>❌</i>
+                    <p>Nenhum grupo blacklist encontrado no sistema</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="info-card">
+            <h3>📱 Dispositivo/Catraca</h3>
+            {% if blacklist_groups_device %}
+                <div class="info-item">
+                    <span class="info-label">Grupos encontrados:</span>
+                    <span class="info-value">{{ blacklist_groups_device|length }}</span>
+                </div>
+                {% for group in blacklist_groups_device %}
+                    <div class="info-item">
+                        <span class="info-label">{{ group.name }}:</span>
+                        <span class="info-value">ID {{ group.id }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-groups">
+                    <i>❌</i>
+                    <p>Nenhum grupo blacklist encontrado no dispositivo</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="groups-section">
+        <h3>🔍 Grupos Disponíveis no Dispositivo</h3>
+        {% if device_groups %}
+            <p>Selecione o grupo blacklist correto para sincronizar:</p>
+            {% for group in device_groups %}
+                <div class="group-item" data-group-id="{{ group.id }}" data-group-name="{{ group.name }}">
+                    <div class="group-info">
+                        <div class="group-name">{{ group.name }}</div>
+                        <div class="group-id">ID: {{ group.id }}</div>
+                        <div class="group-users">Usuários: {{ group.user_count|default:"N/A" }}</div>
+                    </div>
+                    <div class="group-actions">
+                        <button class="sync-button" onclick="selectGroup({{ group.id }}, '{{ group.name }}')">
+                            Selecionar
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-groups">
+                <i>❌</i>
+                <p>Nenhum grupo encontrado no dispositivo</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Processando sincronização...</p>
+    </div>
+    
+    <div id="sync-result"></div>
+</div>
+
+<script>
+let selectedGroupId = null;
+let selectedGroupName = null;
+
+function selectGroup(groupId, groupName) {
+    // Remover seleção anterior
+    document.querySelectorAll('.group-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Selecionar novo grupo
+    const groupItem = document.querySelector(`[data-group-id="${groupId}"]`);
+    if (groupItem) {
+        groupItem.classList.add('selected');
+        selectedGroupId = groupId;
+        selectedGroupName = groupName;
+        
+        // Atualizar botão
+        const button = groupItem.querySelector('.sync-button');
+        button.textContent = '✅ Selecionado';
+        button.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+    }
+}
+
+function syncBlacklist() {
+    if (!selectedGroupId) {
+        alert('❌ Selecione um grupo primeiro!');
+        return;
+    }
+    
+    if (!confirm(`Tem certeza que deseja sincronizar o grupo blacklist com o ID ${selectedGroupId} (${selectedGroupName})?`)) {
+        return;
+    }
+    
+    // Mostrar loading
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('sync-result').innerHTML = '';
+    
+    // Fazer requisição
+    fetch('{% url "core:processar_sincronizacao_blacklist" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            group_id: selectedGroupId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('loading').style.display = 'none';
+        
+        if (data.success) {
+            document.getElementById('sync-result').innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✅ Sucesso!</strong> ${data.message}
+                </div>
+            `;
+            
+            // Recarregar página após 2 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            document.getElementById('sync-result').innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>❌ Erro:</strong> ${data.message}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('sync-result').innerHTML = `
+            <div class="alert alert-danger">
+                <strong>❌ Erro:</strong> Erro de conexão: ${error.message}
+            </div>
+        `;
+    });
+}
+
+// Adicionar botão de sincronização se houver grupos
+document.addEventListener('DOMContentLoaded', function() {
+    const groupsSection = document.querySelector('.groups-section');
+    if (groupsSection && document.querySelectorAll('.group-item').length > 0) {
+        const syncButton = document.createElement('div');
+        syncButton.style.textAlign = 'center';
+        syncButton.style.marginTop = '20px';
+        syncButton.innerHTML = `
+            <button class="sync-button" onclick="syncBlacklist()" style="font-size: 1.2em; padding: 20px 40px;">
+                🔄 Sincronizar Grupo Blacklist
+            </button>
+        `;
+        groupsSection.appendChild(syncButton);
+    }
+});
+</script>
+{% endblock %}
