@@ -1,0 +1,581 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+    /* Estilos gerais */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #343a40;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    #content-main {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .dashboard-header h1 {
+        color: #2c3e50;
+        font-size: 2.8em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-header p {
+        font-size: 1.2em;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* Grid de cards */
+    .sessoes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    /* Cards de sessão */
+    .sessao-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border-left: 6px solid;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sessao-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .sessao-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* Cores dos cards */
+    .sessao-card.active {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+
+    .sessao-card.pending-rest {
+        border-left-color: #ffc107;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+
+    .sessao-card.blocked {
+        border-left-color: #fd7e14;
+        background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+    }
+
+    /* Conteúdo do card */
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .employee-name {
+        font-size: 1.4em;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .employee-id {
+        font-size: 0.9em;
+        color: #6c757d;
+        background: rgba(108, 117, 125, 0.1);
+        padding: 4px 8px;
+        border-radius: 12px;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.active {
+        background: #28a745;
+        color: white;
+    }
+
+    .status-badge.pending-rest {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .status-badge.blocked {
+        background: #fd7e14;
+        color: white;
+    }
+
+    .card-content {
+        margin-bottom: 15px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.95em;
+    }
+
+    .info-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .tempo-info {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 12px;
+        border-radius: 10px;
+        margin-top: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .tempo-destaque {
+        font-size: 1.1em;
+        font-weight: 700;
+        color: #e74c3c;
+    }
+
+    /* Controles */
+    .dashboard-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .auto-refresh {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .auto-refresh label {
+        font-size: 1em;
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 28px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 28px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #28a745;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1em;
+        color: #495057;
+    }
+
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .status-dot.online {
+        background-color: #28a745;
+        animation: pulse 2s infinite;
+    }
+
+    .status-dot.offline {
+        background-color: #dc3545;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    /* Mensagem quando não há sessões */
+    .no-sessoes {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+        font-size: 1.2em;
+    }
+
+    .no-sessoes-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    /* Animações para novos cards */
+    .sessao-card.new {
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .sessoes-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-controls {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 2.2em;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="dashboard-header">
+        <h1>📊 Dashboard de Sessões</h1>
+        <p>Monitoramento em tempo real das sessões de funcionários</p>
+    </div>
+    
+    <div class="dashboard-controls">
+        <div class="auto-refresh">
+            <label for="autoRefreshToggle">Auto-Refresh:</label>
+            <label class="switch">
+                <input type="checkbox" id="autoRefreshToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="status-indicator">
+            <span id="monitor-status-text">Monitor Online</span>
+            <span id="monitor-status-dot" class="status-dot online"></span>
+        </div>
+        
+        <div class="status-indicator">
+            <span id="total-sessoes">0</span>
+            <span>Sessões Ativas</span>
+        </div>
+    </div>
+    
+    <div id="sessoes-container">
+        <div class="no-sessoes" id="no-sessoes">
+            <div class="no-sessoes-icon">👥</div>
+            <p>Nenhuma sessão ativa no momento</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">As sessões aparecerão aqui quando funcionários passarem na catraca</p>
+        </div>
+        
+        <div class="sessoes-grid" id="sessoes-grid" style="display: none;">
+            <!-- Cards de sessão serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    let autoRefreshEnabled = true;
+    let refreshInterval = 2000; // 2 segundos
+    let lastSessoesData = [];
+
+    // Função para formatar tempo
+    function formatTime(minutes) {
+        if (minutes < 60) {
+            return `${minutes}min`;
+        } else {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins}min`;
+        }
+    }
+
+    // Função para formatar timestamp
+    function formatTimestamp(isoString) {
+        // Extrair diretamente do timestamp sem usar new Date() para evitar conversão de timezone
+        // Formato esperado: "2025-10-10T02:07:52"
+        const timePart = isoString.split('T')[1]; // Pega a parte do tempo "02:07:52"
+        return timePart;
+    }
+
+    // Função para obter classe CSS baseada no estado
+    function getStateClass(state) {
+        switch(state) {
+            case 'active': return 'active';
+            case 'pending_rest': return 'pending-rest';
+            case 'blocked': return 'blocked';
+            default: return 'active';
+        }
+    }
+
+    // Função para obter texto do estado
+    function getStateText(state) {
+        switch(state) {
+            case 'active': return 'Sessão Ativa';
+            case 'pending_rest': return 'Aguardando Saída';
+            case 'blocked': return 'Em Interjornada';
+            default: return 'Ativo';
+        }
+    }
+
+    // Função para criar card de sessão
+    function createSessaoCard(sessao) {
+        const stateClass = getStateClass(sessao.state);
+        const stateText = getStateText(sessao.state);
+        
+        let tempoInfo = '';
+        if (sessao.state === 'active') {
+            if (sessao.tempo_restante_interjornada !== null) {
+                tempoInfo = `
+                    <div class="tempo-info">
+                        <div class="info-row">
+                            <span class="info-label">Tempo decorrido:</span>
+                            <span class="info-value">${formatTime(sessao.tempo_decorrido_minutos)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Pode sair em:</span>
+                            <span class="info-value tempo-destaque">${formatTime(sessao.tempo_restante_interjornada)}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                tempoInfo = `
+                    <div class="tempo-info">
+                        <div class="info-row">
+                            <span class="info-label">Tempo decorrido:</span>
+                            <span class="info-value">${formatTime(sessao.tempo_decorrido_minutos)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value tempo-destaque">Pode sair!</span>
+                        </div>
+                    </div>
+                `;
+            }
+        } else if (sessao.state === 'blocked') {
+            tempoInfo = `
+                <div class="tempo-info">
+                    <div class="info-row">
+                        <span class="info-label">Bloqueado desde:</span>
+                        <span class="info-value">${formatTimestamp(sessao.block_start)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Libera em:</span>
+                        <span class="info-value tempo-destaque">${formatTime(sessao.tempo_restante_liberacao)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="sessao-card ${stateClass}" data-sessao-id="${sessao.id}">
+                <div class="card-header">
+                    <div>
+                        <h3 class="employee-name">${sessao.employee_name}</h3>
+                        <span class="employee-id">ID: ${sessao.employee_id}</span>
+                    </div>
+                    <span class="status-badge ${stateClass}">${stateText}</span>
+                </div>
+                
+                <div class="card-content">
+                    <div class="info-row">
+                        <span class="info-label">Iniciado em:</span>
+                        <span class="info-value">${formatTimestamp(sessao.first_access)}</span>
+                    </div>
+                    ${sessao.last_access ? `
+                        <div class="info-row">
+                            <span class="info-label">Último acesso:</span>
+                            <span class="info-value">${formatTimestamp(sessao.last_access)}</span>
+                        </div>
+                    ` : ''}
+                    ${tempoInfo}
+                </div>
+            </div>
+        `;
+    }
+
+    // Função para buscar e exibir sessões
+    async function fetchSessoes() {
+        if (!autoRefreshEnabled) return;
+
+        try {
+            const response = await fetch('/admin/logs/api/sessoes-ativas/');
+            const data = await response.json();
+
+            if (data.success) {
+                // Atualizar contador
+                document.getElementById('total-sessoes').textContent = data.total_sessoes;
+
+                // Verificar se há mudanças
+                const currentSessoesIds = data.sessoes.map(s => s.id).sort();
+                const lastSessoesIds = lastSessoesData.map(s => s.id).sort();
+                
+                const hasChanges = JSON.stringify(currentSessoesIds) !== JSON.stringify(lastSessoesIds);
+                
+                if (hasChanges || data.sessoes.length === 0) {
+                    updateSessoesDisplay(data.sessoes);
+                    lastSessoesData = data.sessoes;
+                }
+
+                // Atualizar status do monitor
+                updateMonitorStatus(true);
+
+            } else {
+                console.error('Erro na API:', data.error);
+                updateMonitorStatus(false);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar sessões:', error);
+            updateMonitorStatus(false);
+        }
+    }
+
+    // Função para atualizar exibição das sessões
+    function updateSessoesDisplay(sessoes) {
+        const container = document.getElementById('sessoes-container');
+        const noSessoes = document.getElementById('no-sessoes');
+        const grid = document.getElementById('sessoes-grid');
+
+        if (sessoes.length === 0) {
+            noSessoes.style.display = 'block';
+            grid.style.display = 'none';
+        } else {
+            noSessoes.style.display = 'none';
+            grid.style.display = 'grid';
+            
+            // Limpar grid
+            grid.innerHTML = '';
+            
+            // Adicionar cards
+            sessoes.forEach(sessao => {
+                const cardHtml = createSessaoCard(sessao);
+                grid.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+    }
+
+    // Função para atualizar status do monitor
+    function updateMonitorStatus(isOnline) {
+        const statusText = document.getElementById('monitor-status-text');
+        const statusDot = document.getElementById('monitor-status-dot');
+        
+        if (isOnline) {
+            statusText.textContent = 'Monitor Online';
+            statusDot.className = 'status-dot online';
+        } else {
+            statusText.textContent = 'Monitor Offline';
+            statusDot.className = 'status-dot offline';
+        }
+    }
+
+    // Toggle para auto-refresh
+    document.getElementById('autoRefreshToggle').addEventListener('change', function() {
+        autoRefreshEnabled = this.checked;
+        if (autoRefreshEnabled) {
+            fetchSessoes(); // Buscar imediatamente ao reativar
+        }
+    });
+
+    // Iniciar o fetch inicial e configurar o intervalo
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchSessoes();
+        setInterval(fetchSessoes, refreshInterval);
+    });
+</script>
+{% endblock %}

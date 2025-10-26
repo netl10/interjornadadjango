@@ -1,0 +1,16 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'logs:realtime_monitor' %}" class="addlink" style="background: #17a2b8; border-color: #17a2b8;">
+            🔴 Monitor Tempo Real
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'logs:historico_acessos' %}" class="addlink" style="background: #28a745; border-color: #28a745;">
+            📊 Histórico de Acessos
+        </a>
+    </li>
+{% endblock %}

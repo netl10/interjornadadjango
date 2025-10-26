@@ -1,0 +1,913 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block title %}Monitor em Tempo Real - Logs de Acesso{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .realtime-container {
+        padding: 20px;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .monitor-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .monitor-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-online {
+        background: #28a745;
+        box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+    
+    .status-offline {
+        background: #dc3545;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 28px;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .logs-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .logs-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .logs-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #495057;
+        margin: 0;
+    }
+    
+    .auto-refresh {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .refresh-toggle {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .refresh-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: #28a745;
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .logs-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .log-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f3f4;
+        transition: background-color 0.2s;
+    }
+    
+    .log-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .log-item.new {
+        animation: highlight 2s ease-out;
+    }
+
+    /* Cores de fundo para cada tipo de evento */
+    .log-item.event-entrada {
+        background-color: rgba(40, 167, 69, 0.1); /* Verde claro */
+        border-left: 4px solid #28a745;
+    }
+
+    .log-item.event-saida {
+        background-color: rgba(0, 123, 255, 0.1); /* Azul claro */
+        border-left: 4px solid #007bff;
+    }
+
+    .log-item.event-nao-encontrado {
+        background-color: rgba(220, 53, 69, 0.1); /* Vermelho claro */
+        border-left: 4px solid #dc3545;
+    }
+
+    .log-item.event-nao-cadastrado {
+        background-color: rgba(253, 126, 20, 0.1); /* Laranja claro */
+        border-left: 4px solid #fd7e14;
+    }
+
+    .log-item.event-desistencia {
+        background-color: rgba(255, 193, 7, 0.1); /* Amarelo claro */
+        border-left: 4px solid #ffc107;
+    }
+
+    .log-item.event-outros {
+        background-color: rgba(108, 117, 125, 0.1); /* Cinza claro */
+        border-left: 4px solid #6c757d;
+    }
+    
+    @keyframes highlight {
+        0% { background-color: #d4edda; }
+        100% { background-color: transparent; }
+    }
+    
+    .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .log-id {
+        font-weight: bold;
+        color: #667eea;
+        font-size: 16px;
+    }
+    
+    .log-timestamp {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .log-user {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 4px;
+    }
+    
+    .log-details {
+        display: flex;
+        gap: 15px;
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    .log-event {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .event-entrada {
+        background: #28a745;
+        color: white;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+    }
+    
+    .event-saida {
+        background: #007bff;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+    }
+    
+    .event-nao-encontrado {
+        background: #dc3545;
+        color: white;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    }
+    
+    .event-nao-cadastrado {
+        background: #fd7e14; /* Laranja */
+        color: white;
+        box-shadow: 0 2px 4px rgba(253, 126, 20, 0.3);
+    }
+    
+    .event-desistencia {
+        background: #ffc107;
+        color: #212529;
+        box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+    }
+    
+    .event-outros {
+        background: #6c757d;
+        color: white;
+        box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+    }
+    
+    .error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+    
+    .last-update {
+        text-align: center;
+        padding: 10px;
+        color: #6c757d;
+        font-size: 12px;
+        border-top: 1px solid #f1f3f4;
+    }
+    
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="realtime-container">
+    <div class="monitor-header">
+        <h1>
+            <span class="status-indicator" id="status-indicator"></span>
+            Monitor em Tempo Real - Logs de Acesso
+        </h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">
+            Visualização em tempo real dos logs de acesso da catraca
+        </p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="total-logs">-</div>
+            <div class="stat-label">Total de Logs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="recent-logs">-</div>
+            <div class="stat-label">Última Hora</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="last-processed">-</div>
+            <div class="stat-label">Último ID Processado</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="monitor-errors">-</div>
+            <div class="stat-label">Erros Consecutivos</div>
+        </div>
+    </div>
+    
+    <!-- Legenda de Cores -->
+    <div class="logs-container" style="margin-bottom: 20px;">
+        <div class="logs-header">
+            <h2 class="logs-title">Legenda de Eventos</h2>
+        </div>
+        <div style="padding: 15px 20px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="log-event event-entrada">ENTRADA (7-P1)</span>
+                <span style="font-size: 14px; color: #6c757d;">Portal 1 - Acesso autorizado</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="log-event event-saida">SAÍDA (7-P2)</span>
+                <span style="font-size: 14px; color: #6c757d;">Portal 2 - Saída autorizada</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="log-event event-nao-cadastrado">NÃO CADASTRADO (ID=0)</span>
+                <span style="font-size: 14px; color: #6c757d;">NÃO ENCONTRADO</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="log-event event-nao-encontrado">NEGADO (3,6)</span>
+                <span style="font-size: 14px; color: #6c757d;">Acesso negado</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="log-event event-desistencia">DESISTÊNCIA (13)</span>
+                <span style="font-size: 14px; color: #6c757d;">Usuário desistiu</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="log-event event-outros">OUTROS</span>
+                <span style="font-size: 14px; color: #6c757d;">Outros eventos</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="logs-container">
+        <div class="logs-header">
+            <h2 class="logs-title">Logs Recentes</h2>
+            <div class="auto-refresh">
+                <label for="auto-refresh-toggle">Auto-atualizar:</label>
+                <label class="refresh-toggle">
+                    <input type="checkbox" id="auto-refresh-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+                <span id="refresh-interval">0.5s</span>
+            </div>
+        </div>
+        
+        <div class="logs-list" id="logs-list">
+            <div class="loading">Carregando logs...</div>
+        </div>
+        
+        <div class="last-update" id="last-update">
+            Última atualização: -
+        </div>
+    </div>
+</div>
+
+
+<script>
+let autoRefresh = true;
+let refreshInterval = 500; // 500ms para detecção mais rápida
+let refreshTimer = null;
+let lastLogId = 0;
+let processedAccessDeniedLogs = new Set(); // Para evitar mostrar o mesmo log múltiplas vezes
+
+// WebSocket para notificações em tempo real
+let websocket = null;
+let websocketConnected = false;
+let websocketReconnectAttempts = 0;
+let maxReconnectAttempts = 5;
+
+// Elementos DOM
+const statusIndicator = document.getElementById('status-indicator');
+const totalLogs = document.getElementById('total-logs');
+const recentLogs = document.getElementById('recent-logs');
+const lastProcessed = document.getElementById('last-processed');
+const monitorErrors = document.getElementById('monitor-errors');
+const logsList = document.getElementById('logs-list');
+const lastUpdate = document.getElementById('last-update');
+const autoRefreshToggle = document.getElementById('auto-refresh-toggle');
+
+// Função para formatar timestamp
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+        // Removido timeZone para usar o timestamp original
+    });
+}
+
+// Função para obter classe do evento
+function getEventClass(eventDescription, eventType, portalId, userId) {
+    const event = eventDescription.toString().toLowerCase();
+    
+    // Verificar se é um log de "não encontrado" (user_id = 0)
+    if (userId === 0) {
+        return 'event-nao-cadastrado';  // Laranja - Não cadastrado
+    }
+    
+    // PRIORIZAR event_type sobre event_description para evitar conflitos
+    // Mapear event_type para classes CSS
+    switch(eventType) {
+        case 1: // Entrada
+            return 'event-entrada';
+        case 2: // Saída
+            return 'event-saida';
+        case 3: // Não Identificado
+            return 'event-nao-cadastrado';  // Laranja - Não encontrado
+        case 4: // Erro de Leitura
+        case 5: // Timeout
+            return 'event-outros';
+        case 6: // Acesso Negado - SEMPRE vermelho, independente da descrição
+            return 'event-nao-encontrado';  // Vermelho - Acesso negado
+        case 7: // Acesso Autorizado
+            // Portal 1 = Entrada (Verde), Portal 2 = Saída (Azul)
+            if (portalId === 1) {
+                return 'event-entrada';     // Verde - Entrada
+            } else if (portalId === 2) {
+                return 'event-saida';       // Azul - Saída
+            }
+            return 'event-entrada';         // Default para entrada
+        case 8: // Acesso Bloqueado
+            return 'event-nao-encontrado';  // Vermelho - Acesso negado
+        case 13: // Desistência
+            return 'event-desistencia';     // Amarelo - Desistência
+        default:
+            break;
+    }
+    
+    // Verificar por código de evento na descrição (event_description contém o código real)
+    if (event === '13') {
+        return 'event-desistencia';     // Amarelo - Desistência
+    } else if (event === '7') {
+        // Código 7: Portal 1 = Entrada (Verde), Portal 2 = Saída (Azul)
+        if (portalId === 1) {
+            return 'event-entrada';     // Verde - Entrada
+        } else if (portalId === 2) {
+            return 'event-saida';       // Azul - Saída
+        }
+        return 'event-entrada';         // Default para entrada
+    } else if (event === '6') {
+        return 'event-nao-encontrado';  // Vermelho - Acesso negado
+    } else if (event === '3') {
+        return 'event-nao-cadastrado';  // Laranja - Não encontrado
+    } else if (event === '8') {
+        return 'event-nao-encontrado';  // Vermelho - Acesso negado
+    }
+    
+    // Verificar por descrição do evento
+    if (event.includes('entrada') || event.includes('autorizado')) {
+        return 'event-entrada';  // Verde
+    } else if (event.includes('saída') || event.includes('saida')) {
+        return 'event-saida';    // Azul
+    } else if (event.includes('não encontrado') || event.includes('nao encontrado')) {
+        return 'event-nao-cadastrado';  // Laranja - Não encontrado
+    } else if (event.includes('negado') || event.includes('bloqueado')) {
+        return 'event-nao-encontrado';  // Vermelho - Acesso negado
+    } else if (event.includes('desistência') || event.includes('desistencia') || event.includes('desistir')) {
+        return 'event-desistencia';     // Amarelo
+    }
+    
+    return 'event-outros';  // Cinza para outros eventos
+}
+
+// Função para obter descrição correta do evento
+function getCorrectEventDescription(eventDescription, eventType, portalId) {
+    // Priorizar event_type sobre event_description para evitar conflitos
+    switch(eventType) {
+        case 1: // Entrada
+            return 'Entrada';
+        case 2: // Saída
+            return 'Saída';
+        case 3: // Não Identificado
+            return 'Não Identificado';
+        case 4: // Erro de Leitura
+            return 'Erro de Leitura';
+        case 5: // Timeout
+            return 'Timeout';
+        case 6: // Acesso Negado - SEMPRE mostrar como "Negado"
+            return 'Negado';
+        case 7: // Acesso Autorizado
+            if (portalId === 1) {
+                return 'Entrada';
+            } else if (portalId === 2) {
+                return 'Saída';
+            }
+            return 'Entrada';
+        case 8: // Acesso Bloqueado
+            return 'Negado';
+        case 13: // Desistência
+            return 'Desistência';
+        default:
+            return eventDescription || `Evento ${eventType}`;
+    }
+}
+
+// Função para criar elemento de log
+function createLogElement(log) {
+    const logDiv = document.createElement('div');
+    const eventClass = getEventClass(log.event_description, log.event_type, log.portal_id, log.user_id);
+    const correctDescription = getCorrectEventDescription(log.event_description, log.event_type, log.portal_id);
+    logDiv.className = `log-item ${eventClass}`;
+    logDiv.id = `log-${log.id}`;
+    
+    // Verificar se é um log novo
+    if (log.id > lastLogId) {
+        logDiv.classList.add('new');
+    }
+    
+    logDiv.innerHTML = `
+        <div class="log-header">
+            <span class="log-id">ID ${log.id}</span>
+            <span class="log-timestamp">${formatTimestamp(log.device_timestamp)}</span>
+        </div>
+        <div class="log-user">${log.user_name} (ID: ${log.user_id})</div>
+        <div class="log-details">
+            <span class="log-event ${eventClass}">${correctDescription}</span>
+            <span>Portal: ${log.portal_id}</span>
+            <span>Status: ${log.processing_status}</span>
+        </div>
+    `;
+    
+    return logDiv;
+}
+
+// Função para atualizar logs
+async function updateLogs() {
+    try {
+        const response = await fetch(`/api/v1/logs/api/logs-publicos/?limit=20&last_id=${lastLogId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Atualizar estatísticas
+            totalLogs.textContent = data.total_logs;
+            recentLogs.textContent = data.monitor_status.recent_logs || 0;
+            lastProcessed.textContent = data.monitor_status.last_processed_id || 0;
+            monitorErrors.textContent = data.monitor_status.consecutive_errors || 0;
+            
+            // Atualizar status do monitor
+            if (data.monitor_status.running) {
+                statusIndicator.className = 'status-indicator status-online';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+            }
+            
+            // Atualizar logs
+            if (data.logs && data.logs.length > 0) {
+                // Limpar loading se existir
+                const loading = logsList.querySelector('.loading');
+                if (loading) {
+                    loading.remove();
+                }
+                
+                // Adicionar novos logs no topo
+                data.logs.reverse().forEach(log => {
+                    const existingLog = document.getElementById(`log-${log.id}`);
+                    if (!existingLog) {
+                        const logElement = createLogElement(log);
+                        logsList.insertBefore(logElement, logsList.firstChild);
+                        
+                        // Log de acesso negado detectado (apenas para log)
+                        if (isAccessDeniedLog(log) && !processedAccessDeniedLogs.has(log.id)) {
+                            processedAccessDeniedLogs.add(log.id);
+                            console.log('🚫 Acesso negado detectado:', log.user_name, '(ID:', log.id, ')');
+                        }
+                        
+                        // Atualizar último ID
+                        if (log.id > lastLogId) {
+                            lastLogId = log.id;
+                        }
+                    }
+                });
+                
+                // Manter apenas os 50 logs mais recentes
+                const logItems = logsList.querySelectorAll('.log-item');
+                if (logItems.length > 50) {
+                    for (let i = 50; i < logItems.length; i++) {
+                        logItems[i].remove();
+                    }
+                }
+            }
+            
+            // Atualizar timestamp da última atualização
+            lastUpdate.textContent = `Última atualização: ${formatTimestamp(data.timestamp)}`;
+            
+        } else {
+            console.error('Erro na API:', data.error);
+            showError(data.error);
+        }
+        
+    } catch (error) {
+        console.error('Erro ao atualizar logs:', error);
+        showError('Erro de conexão');
+    }
+}
+
+// Função para mostrar erro
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error';
+    errorDiv.textContent = `Erro: ${message}`;
+    logsList.insertBefore(errorDiv, logsList.firstChild);
+    
+    // Remover erro após 5 segundos
+    setTimeout(() => {
+        if (errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
+}
+
+
+// Função para verificar se um log é de acesso negado
+function isAccessDeniedLog(log) {
+    // Verificar por event_type (6 = Acesso Negado, 8 = Acesso Bloqueado)
+    if (log.event_type === 6 || log.event_type === 8) {
+        return true;
+    }
+    
+    // Verificar por user_id = 0 (não cadastrado)
+    if (log.user_id === 0) {
+        return true;
+    }
+    
+    // Verificar por event_description contendo códigos de negação
+    const eventDesc = log.event_description?.toString().toLowerCase() || '';
+    if (eventDesc === '6' || eventDesc === '8' || 
+        eventDesc.includes('negado') || eventDesc.includes('bloqueado')) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Funções WebSocket
+function connectWebSocket() {
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+        return; // Já conectado
+    }
+    
+    try {
+        // Usar o protocolo correto baseado na URL atual
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/logs/`;
+        
+        console.log('🔌 Tentando conectar WebSocket para logs:', wsUrl);
+        
+        websocket = new WebSocket(wsUrl);
+        
+        // Timeout para conexão
+        const connectionTimeout = setTimeout(() => {
+            if (websocket && websocket.readyState === WebSocket.CONNECTING) {
+                console.log('⏰ Timeout na conexão WebSocket, usando HTTP polling');
+                websocket.close();
+                websocketConnected = false;
+            }
+        }, 3000);
+        
+        websocket.onopen = function(event) {
+            clearTimeout(connectionTimeout);
+            console.log('✅ WebSocket conectado para logs');
+            websocketConnected = true;
+            websocketReconnectAttempts = 0;
+            
+            // Atualizar status do monitor
+            if (statusIndicator) {
+                statusIndicator.className = 'status-indicator status-online';
+            }
+        };
+        
+        websocket.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            } catch (error) {
+                console.error('❌ Erro ao processar mensagem WebSocket:', error);
+            }
+        };
+        
+        websocket.onclose = function(event) {
+            clearTimeout(connectionTimeout);
+            console.log('❌ WebSocket desconectado para logs');
+            websocketConnected = false;
+            
+            // Atualizar status do monitor
+            if (statusIndicator) {
+                statusIndicator.className = 'status-indicator status-offline';
+            }
+            
+            // Não tentar reconectar automaticamente para evitar spam
+            console.log('📡 Usando HTTP polling como fallback');
+        };
+        
+        websocket.onerror = function(error) {
+            clearTimeout(connectionTimeout);
+            console.log('❌ Erro no WebSocket, usando HTTP polling:', error);
+            websocketConnected = false;
+        };
+        
+    } catch (error) {
+        console.log('❌ WebSocket não suportado, usando HTTP polling:', error);
+        websocketConnected = false;
+    }
+}
+
+function disconnectWebSocket() {
+    if (websocket) {
+        websocket.close();
+        websocket = null;
+        websocketConnected = false;
+    }
+}
+
+function handleWebSocketMessage(data) {
+    console.log('📡 Mensagem WebSocket recebida:', data.type);
+    
+    switch (data.type) {
+        case 'initial_logs':
+        case 'logs_update':
+            if (data.data && data.data.logs) {
+                updateLogsFromWebSocket(data.data);
+            }
+            break;
+            
+        case 'access_denied':
+            console.log('🚫 Notificação de acesso negado recebida via WebSocket:', data.data);
+            break;
+            
+        case 'new_log':
+            console.log('📝 Novo log recebido via WebSocket');
+            if (data.data) {
+                addNewLogToDisplay(data.data);
+            }
+            break;
+            
+        case 'pong':
+            // Resposta do ping
+            break;
+            
+        default:
+            console.log('📡 Tipo de mensagem desconhecido:', data.type);
+    }
+}
+
+function updateLogsFromWebSocket(data) {
+    // Atualizar estatísticas
+    if (data.total_logs !== undefined) {
+        totalLogs.textContent = data.total_logs;
+    }
+    
+    // Atualizar logs
+    if (data.logs && data.logs.length > 0) {
+        // Limpar loading se existir
+        const loading = logsList.querySelector('.loading');
+        if (loading) {
+            loading.remove();
+        }
+        
+        // Adicionar novos logs no topo
+        data.logs.reverse().forEach(log => {
+            const existingLog = document.getElementById(`log-${log.id}`);
+            if (!existingLog) {
+                const logElement = createLogElement(log);
+                logsList.insertBefore(logElement, logsList.firstChild);
+                
+                // Log de acesso negado detectado (apenas para log)
+                if (isAccessDeniedLog(log) && !processedAccessDeniedLogs.has(log.id)) {
+                    processedAccessDeniedLogs.add(log.id);
+                    console.log('🚫 Acesso negado detectado via WebSocket:', log.user_name, '(ID:', log.id, ')');
+                }
+                
+                // Atualizar último ID
+                if (log.id > lastLogId) {
+                    lastLogId = log.id;
+                }
+            }
+        });
+        
+        // Manter apenas os 50 logs mais recentes
+        const logItems = logsList.querySelectorAll('.log-item');
+        if (logItems.length > 50) {
+            for (let i = 50; i < logItems.length; i++) {
+                logItems[i].remove();
+            }
+        }
+    }
+    
+    // Atualizar timestamp da última atualização
+    if (data.timestamp) {
+        lastUpdate.textContent = `Última atualização: ${formatTimestamp(data.timestamp)}`;
+    }
+}
+
+function addNewLogToDisplay(log) {
+    const existingLog = document.getElementById(`log-${log.id}`);
+    if (!existingLog) {
+        const logElement = createLogElement(log);
+        logsList.insertBefore(logElement, logsList.firstChild);
+        
+        // Log de acesso negado detectado (apenas para log)
+        if (isAccessDeniedLog(log) && !processedAccessDeniedLogs.has(log.id)) {
+            processedAccessDeniedLogs.add(log.id);
+            console.log('🚫 Acesso negado detectado via novo log:', log.user_name, '(ID:', log.id, ')');
+        }
+        
+        // Atualizar último ID
+        if (log.id > lastLogId) {
+            lastLogId = log.id;
+        }
+    }
+}
+
+
+// Função para iniciar auto-refresh
+function startAutoRefresh() {
+    if (refreshTimer) {
+        clearInterval(refreshTimer);
+    }
+    
+    if (autoRefresh) {
+        refreshTimer = setInterval(updateLogs, refreshInterval);
+    }
+}
+
+// Função para parar auto-refresh
+function stopAutoRefresh() {
+    if (refreshTimer) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+    }
+}
+
+// Event listeners
+autoRefreshToggle.addEventListener('change', function() {
+    autoRefresh = this.checked;
+    if (autoRefresh) {
+        startAutoRefresh();
+    } else {
+        stopAutoRefresh();
+    }
+});
+
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    // Tentar conectar WebSocket (opcional)
+    try {
+        connectWebSocket();
+    } catch (error) {
+        console.log('WebSocket não disponível, usando HTTP polling:', error);
+    }
+    
+    // Carregar logs iniciais via HTTP
+    updateLogs();
+    
+    // Iniciar auto-refresh HTTP (método principal)
+    startAutoRefresh();
+    
+    // Atualizar quando a página ganha foco
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && autoRefresh) {
+            updateLogs();
+        }
+    });
+});
+
+// Limpar timer e WebSocket quando a página é fechada
+window.addEventListener('beforeunload', function() {
+    stopAutoRefresh();
+    disconnectWebSocket();
+});
+</script>
+{% endblock %}

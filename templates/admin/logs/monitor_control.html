@@ -1,0 +1,353 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}Controle do Monitoramento Automático{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .monitor-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .status-card {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .status-card h3 {
+        margin-top: 0;
+        color: #007bff;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 10px;
+    }
+    
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .status-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+    }
+    
+    .status-item .label {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    
+    .status-item .value {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .status-running {
+        color: #28a745;
+    }
+    
+    .status-stopped {
+        color: #dc3545;
+    }
+    
+    .control-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #1e7e34;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn-info:hover {
+        background: #138496;
+    }
+    
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        display: none;
+    }
+    
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    .auto-refresh {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <a href="{% url 'admin:index' %}">Início</a> &rsaquo;
+    <a href="{% url 'admin:logs_accesslog_changelist' %}">Logs de Acesso</a> &rsaquo;
+    Monitoramento
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="monitor-container">
+    <div class="alert alert-success" id="success-alert"></div>
+    <div class="alert alert-danger" id="error-alert"></div>
+    
+    <div class="status-card">
+        <h3>📊 Status do Monitoramento Automático</h3>
+        
+        <div class="status-grid">
+            <div class="status-item">
+                <div class="label">Status</div>
+                <div class="value" id="monitor-status">
+                    {% if status.running %}
+                        <span class="status-running">🟢 Rodando</span>
+                    {% else %}
+                        <span class="status-stopped">🔴 Parado</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="status-item">
+                <div class="label">Último ID Processado</div>
+                <div class="value" id="last-processed-id">{{ status.last_processed_id }}</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="label">Intervalo (segundos)</div>
+                <div class="value" id="monitor-interval">{{ status.monitor_interval }}</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="label">Tamanho do Lote</div>
+                <div class="value" id="batch-size">{{ status.batch_size }}</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="label">Total de Logs</div>
+                <div class="value" id="total-logs">{{ total_logs }}</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="label">Logs da Última Hora</div>
+                <div class="value" id="recent-logs">{{ recent_logs }}</div>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-success" onclick="controlMonitor('start')" id="start-btn">
+                ▶️ Iniciar Monitoramento
+            </button>
+            <button class="btn btn-danger" onclick="controlMonitor('stop')" id="stop-btn">
+                ⏹️ Parar Monitoramento
+            </button>
+            <button class="btn btn-warning" onclick="controlMonitor('restart')" id="restart-btn">
+                🔄 Reiniciar Monitoramento
+            </button>
+            <button class="btn btn-info" onclick="refreshStatus()" id="refresh-btn">
+                🔄 Atualizar Status
+            </button>
+        </div>
+    </div>
+    
+    <div class="status-card">
+        <h3>📈 Estatísticas em Tempo Real</h3>
+        
+        <div class="auto-refresh">
+            <p><strong>🔄 Atualização Automática:</strong> Esta página atualiza automaticamente a cada 10 segundos.</p>
+            <p><strong>📊 Última Atualização:</strong> <span id="last-update"></span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+let autoRefreshInterval;
+
+function showAlert(message, type) {
+    const alertId = type === 'success' ? 'success-alert' : 'error-alert';
+    const alert = document.getElementById(alertId);
+    alert.textContent = message;
+    alert.style.display = 'block';
+    
+    setTimeout(() => {
+        alert.style.display = 'none';
+    }, 5000);
+}
+
+function setLoading(loading) {
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(btn => {
+        if (loading) {
+            btn.classList.add('loading');
+            btn.disabled = true;
+        } else {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    });
+}
+
+function controlMonitor(action) {
+    setLoading(true);
+    
+    const formData = new FormData();
+    formData.append('action', action);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch('{% url "logs:monitor_control" %}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            setTimeout(() => {
+                refreshStatus();
+            }, 1000);
+        } else {
+            showAlert(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showAlert('Erro ao executar ação: ' + error.message, 'error');
+    })
+    .finally(() => {
+        setLoading(false);
+    });
+}
+
+function refreshStatus() {
+    fetch('{% url "logs:api_monitor_status" %}')
+    .then(response => response.json())
+    .then(data => {
+        // Atualizar status
+        const statusElement = document.getElementById('monitor-status');
+        if (data.running) {
+            statusElement.innerHTML = '<span class="status-running">🟢 Rodando</span>';
+        } else {
+            statusElement.innerHTML = '<span class="status-stopped">🔴 Parado</span>';
+        }
+        
+        // Atualizar outros campos
+        document.getElementById('last-processed-id').textContent = data.last_processed_id;
+        document.getElementById('monitor-interval').textContent = data.monitor_interval;
+        document.getElementById('batch-size').textContent = data.batch_size;
+        document.getElementById('total-logs').textContent = data.total_logs;
+        document.getElementById('recent-logs').textContent = data.recent_logs;
+        
+        // Atualizar timestamp
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+    })
+    .catch(error => {
+        console.error('Erro ao atualizar status:', error);
+    });
+}
+
+function startAutoRefresh() {
+    autoRefreshInterval = setInterval(refreshStatus, 10000); // 10 segundos
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    refreshStatus();
+    startAutoRefresh();
+    
+    // Parar auto-refresh quando a página for fechada
+    window.addEventListener('beforeunload', stopAutoRefresh);
+});
+</script>
+{% endblock %}

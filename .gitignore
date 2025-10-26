@@ -141,7 +141,6 @@ dmypy.json
 Thumbs.db
 
 # Logs
-logs/
 *.log
 
 # Test files
